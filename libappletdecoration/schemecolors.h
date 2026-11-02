@@ -75,11 +75,11 @@ public:
     static QString possibleSchemeFile(QString scheme);
     static QString schemeName(QString originalFile);
 
-signals:
+Q_SIGNALS:
     void colorsChanged();
     void schemeFileChanged();
 
-public slots:
+public Q_SLOTS:
     void updateScheme();
 
 private:

@@ -74,7 +74,7 @@ void ExtendedTheme::setOriginalSchemeFile(const QString &file)
 
     updateDefaultScheme();
 
-    emit themeChanged();
+    Q_EMIT themeChanged();
 }
 
 //! WM records need to be updated based on the colors that
@@ -103,7 +103,7 @@ void ExtendedTheme::updateDefaultScheme()
 
     qDebug() << "Window Buttons : plasma theme default colors ::: " << m_colorsSchemePath;
 
-    emit colorsChanged();
+    Q_EMIT colorsChanged();
 }
 
 void ExtendedTheme::updateDefaultSchemeValues()

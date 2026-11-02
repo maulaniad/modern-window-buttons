@@ -17,103 +17,45 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import QtQuick 2.0
-import QtQuick.Controls 1.0
-import QtQuick.Controls 2.2 as Controls22
-import QtQuick.Layouts 1.0
+import QtQuick
+import QtQuick.Controls as QQC2
 
-Controls22.ComboBox{
+QQC2.ComboBox {
     id: combobox
 
-    model: decs
-    property var decs: []
+    textRole: "text"
+    model: []
 
-    Connections{
-        target: popup
-        onClosed: root.forceActiveFocus();
+    onActivated: function(index) {
+        const entry = model[index];
+        root.useCurrent = (index === 0);
+        root.selectedPlugin = entry.plugin;
+        root.selectedTheme = entry.theme;
     }
 
-    delegate: MouseArea{
-        width: combobox.width
-        height: combobox.height
-        hoverEnabled: true
-
-        onClicked: {
-            combobox.currentIndex = index;
-            activateItem(index);
-            combobox.popup.close();
-        }
-
-        Rectangle{
-            id:delegateBackground
-            anchors.fill: parent
-            color: {
-                if (containsMouse) {
-                    return palette.highlight;
-                }
-                if (combobox.currentIndex === index) {
-                    return selectedColor;
-                }
-
-                return "transparent";
-            }
-
-            readonly property color selectedColor: Qt.rgba(palette.highlight.r, palette.highlight.g, palette.highlight.b, 0.5);
-
-            Label{
-                id: label
-                anchors.left: parent.left
-                anchors.leftMargin: units.smallSpacing
-                anchors.verticalCenter: parent.verticalCenter
-                text: decs[index];
-                color: containsMouse ? palette.highlightedText : palette.text
-            }
-        }
-    }
-
-
-    function activateItem(itemIndex) {
-        if (itemIndex===0) {
-            root.useCurrent = true;
-            root.selectedPlugin = "";
-            root.selectedTheme = "";
-        } else {
-            root.useCurrent = false;
-            var d = sortedDecorations.get(itemIndex-1);
-            root.selectedPlugin = d.plugin;
-            root.selectedTheme = d.theme;
-        }
-    }
-
+    //! "Current" first, then all decorations sorted by their visible name
     function feedDecorations() {
-        for (var i=0; i<sortedDecorations.count; ++i) {
-            var d = sortedDecorations.get(i);
-            decs.push(d.display);
+        let list = [];
+        for (let i = 0; i < decorations.count; ++i) {
+            const d = decorations.get(i);
+            list.push({ text: d.display, plugin: d.plugin, theme: d.theme });
         }
+        list.sort(function(a, b) { return a.text.localeCompare(b.text); });
+        list.unshift({ text: i18nc("the decoration KWin currently uses", "Current"), plugin: "", theme: "" });
 
-        decorationCmb.model = decs;
-    }
+        model = list;
 
-    function indexFor(plugin, theme) {
-        for (var i=0; i<sortedDecorations.count; ++i) {
-            var d = sortedDecorations.get(i);
-            if (d.plugin === plugin && d.theme === theme) {
-                return i+1;
+        let idx = 0;
+        if (!root.useCurrent) {
+            for (let j = 1; j < list.length; ++j) {
+                if (list[j].plugin === root.currentPlugin && list[j].theme === root.currentTheme) {
+                    idx = j;
+                    break;
+                }
             }
         }
-
-        return 0;
+        currentIndex = idx;
     }
 
-    function initDecorations() {
-        decs.push("Current");
-    }
-
-    Component.onCompleted: {
-        initDecorations();
-        feedDecorations();
-        if (!root.useCurrent) {
-            currentIndex = indexFor(root.currentPlugin, root.currentTheme);
-        }
-    }
+    Component.onCompleted: feedDecorations()
 }

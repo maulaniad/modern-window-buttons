@@ -20,7 +20,6 @@
 
 #include "schemecolors.h"
 
-#include <config-decoration.h>
 #include "commontools.h"
 
 #include <QDebug>
@@ -145,7 +144,7 @@ void SchemeColors::setSchemeFile(QString file)
     }
 
     m_schemeFile = file;
-    emit schemeFileChanged();
+    Q_EMIT schemeFileChanged();
 }
 
 QString SchemeColors::possibleSchemeFile(QString scheme)
@@ -162,11 +161,7 @@ QString SchemeColors::possibleSchemeFile(QString scheme)
         if (QFileInfo(settingsFile).exists()) {
             KSharedConfigPtr filePtr = KSharedConfig::openConfig(settingsFile);
             KConfigGroup generalGroup = KConfigGroup(filePtr, "General");
-#if KDECORATION2_VERSION_MINOR >= 21
             tempScheme = generalGroup.readEntry("ColorScheme", "BreezeLight");
-#else
-            tempScheme = generalGroup.readEntry("ColorScheme", "Breeze");
-#endif
         }
     }
 
@@ -237,7 +232,7 @@ void SchemeColors::updateScheme()
     m_buttonHoverColor = buttonGroup.readEntry("DecorationHover", QColor());
     m_buttonFocusColor = buttonGroup.readEntry("DecorationFocus", QColor());
 
-    emit colorsChanged();
+    Q_EMIT colorsChanged();
 }
 
 }

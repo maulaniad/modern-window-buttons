@@ -46,7 +46,7 @@ void Padding::setTop(int top)
     }
 
     m_top = top;
-    emit topChanged();
+    Q_EMIT topChanged();
 }
 
 int Padding::left() const
@@ -61,7 +61,7 @@ void Padding::setLeft(int left)
     }
 
     m_left = left;
-    emit leftChanged();
+    Q_EMIT leftChanged();
 }
 
 int Padding::bottom()const
@@ -76,7 +76,7 @@ void Padding::setBottom(int bottom)
     }
 
     m_bottom = bottom;
-    emit bottomChanged();
+    Q_EMIT bottomChanged();
 }
 
 int Padding::right() const
@@ -91,7 +91,7 @@ void Padding::setRight(int right)
     }
 
     m_right = right;
-    emit rightChanged();
+    Q_EMIT rightChanged();
 }
 
 }

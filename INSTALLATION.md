@@ -6,18 +6,18 @@ The provided `install.sh` script will build everything and install it for you. B
 
 ### Build Dependencies
 
-- Ubuntu:
-```
-sudo apt install g++ extra-cmake-modules qtbase5-dev qtdeclarative5-dev libkf5declarative-dev libkf5plasma-dev libkdecorations2-dev gettext
-```
+This version targets **Plasma 6.3 or newer** (Qt 6, KDE Frameworks 6, KDecoration3).
+
 - Fedora:
 ```
-sudo dnf install extra-cmake-modules qt5-qtdeclarative-devel kf5-plasma-devel kf5-kdeclarative-devel kf5-kconfigwidgets-devel kf5-ki18n-devel kdecoration-devel
+sudo dnf install gcc-c++ extra-cmake-modules qt6-qtdeclarative-devel qt6-qt5compat \
+    kf6-kconfig-devel kf6-kcoreaddons-devel kf6-ki18n-devel kf6-kcolorscheme-devel kf6-ksvg-devel \
+    libplasma-devel kdecoration-devel
 ```
 - Arch:
 ```
-sudo pacman -Syu
-sudo pacman -S gcc extra-cmake-modules plasma-framework gettext kdecoration
+sudo pacman -S gcc cmake extra-cmake-modules qt6-declarative qt6-5compat \
+    kconfig kcoreaddons ki18n kcolorscheme ksvg libplasma kdecoration
 ```
 
 ### Building and Installing
@@ -25,17 +25,7 @@ Once you have installed the dependencies listed above you can execute the build 
 
 ```
 sh install.sh
+systemctl --user restart plasma-plasmashell
 ```
 
-## Prebuilt Binaries
-
-- Ubuntu: You can install via a PPA on Ubuntu 18.04 (Bionic) or later including KDE Neon.
-```
-sudo add-apt-repository ppa:krisives/applet-window-buttons
-sudo apt install applet-window-buttons
-```
-
-- openSUSE: install the package from the official repo
-```
-sudo zypper in applet-window-buttons
-```
+`install.sh` asks for `sudo` to install into `/usr` and first removes an older copy of the applet, so stale files from Plasma 5 builds or other forks can't shadow the new ones. `uninstall.sh` removes what the last build installed.

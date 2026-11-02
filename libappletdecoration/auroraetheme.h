@@ -75,11 +75,11 @@ public:
     bool hasMonochromeIcons() const;
     QString monochromePrefix() const;
 
-signals:
+Q_SIGNALS:
     void settingsChanged();
     void themeChanged();
 
-private slots:
+private Q_SLOTS:
     void parseThemeImages();
     void auroraeRCChanged(const QString &filename);
 

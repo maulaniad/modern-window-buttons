@@ -53,7 +53,7 @@ public:
     int right() const;
     void setRight(int right);
 
-signals:
+Q_SIGNALS:
     void topChanged();
     void leftChanged();
     void bottomChanged();

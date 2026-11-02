@@ -20,8 +20,11 @@
 
 #include "windowsystem.h"
 
-#include <QProcess>
-#include <QtDBus/QtDBus>
+#include <KConfigGroup>
+#include <KSharedConfig>
+
+#include <QDBusMessage>
+#include <QDBusConnection>
 
 namespace Decoration {
 namespace Applet {
@@ -36,14 +39,8 @@ WindowSystem::~WindowSystem() = default;
 
 bool WindowSystem::kwin_disabledMaximizedBorders() const
 {
-    QProcess process;
-    process.start("kreadconfig5 --file kwinrc --group Windows --key BorderlessMaximizedWindows");
-    process.waitForFinished();
-    QString output(process.readAllStandardOutput());
-
-    output = output.remove("\n");
-
-    return (output == "true");
+    const KConfigGroup windows(KSharedConfig::openConfig(QStringLiteral("kwinrc"), KConfig::NoGlobals), QStringLiteral("Windows"));
+    return windows.readEntry("BorderlessMaximizedWindows", false);
 }
 
 void WindowSystem::setDisabledMaximizedBorders(bool disable)
@@ -52,18 +49,16 @@ void WindowSystem::setDisabledMaximizedBorders(bool disable)
         return;
     }
 
-    QString disableText = disable ? "true" : "false";
+    auto config = KSharedConfig::openConfig(QStringLiteral("kwinrc"), KConfig::NoGlobals);
+    KConfigGroup windows(config, QStringLiteral("Windows"));
+    windows.writeEntry("BorderlessMaximizedWindows", disable, KConfig::Notify);
+    config->sync();
 
-    QProcess process;
-    QString commandStr = "kwriteconfig5 --file kwinrc --group Windows --key BorderlessMaximizedWindows --type bool " + disableText;
-    process.start(commandStr);
-    process.waitForFinished();
-
-    QDBusInterface iface("org.kde.KWin", "/KWin", "", QDBusConnection::sessionBus());
-
-    if (iface.isValid()) {
-        iface.call("reconfigure");
-    }
+    //! ask all KWin instances to reload their configuration
+    QDBusMessage message = QDBusMessage::createSignal(QStringLiteral("/KWin"),
+                                                      QStringLiteral("org.kde.KWin"),
+                                                      QStringLiteral("reloadConfig"));
+    QDBusConnection::sessionBus().send(message);
 }
 
 }

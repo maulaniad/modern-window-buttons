@@ -33,7 +33,6 @@
 #include <KSharedConfig>
 
 // Plasma
-#include <Plasma/FrameSvg>
 #include <Plasma/Theme>
 
 namespace Decoration {
@@ -58,7 +57,7 @@ public:
 
     void load();
 
-signals:
+Q_SIGNALS:
     void colorsChanged();
     void themeChanged();
 

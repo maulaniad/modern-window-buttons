@@ -1,5 +1,5 @@
 /*
-*  Copyright 2018 Michail Vourlakos <mvourlakos@gmail.com>
+*  Copyright 2018  Michail Vourlakos <mvourlakos@gmail.com>
 *
 *  This file is part of applet-window-buttons
 *
@@ -17,16 +17,17 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import QtQuick 2.0
-import QtQuick.Controls 1.0
-import QtQuick.Layouts 1.0
+import QtQuick
+import QtQuick.Controls as QQC2
+import QtQuick.Layouts
 
-import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.plasma.components 2.0 as PlasmaComponents
+import org.kde.kcmutils as KCM
+import org.kde.kirigami as Kirigami
+import org.kde.plasma.core as PlasmaCore
 
-import org.kde.appletdecoration 0.1 as AppletDecoration
+import org.kde.appletdecoration as AppletDecoration
 
-Item {
+KCM.SimpleKCM {
     id: root
 
     property alias cfg_useCurrentDecoration: root.useCurrent
@@ -43,7 +44,30 @@ Item {
     property alias cfg_spacing: spacingSpn.value
     property alias cfg_lengthFirstMargin: lengthFirstSpn.value
     property alias cfg_lengthLastMargin: lengthLastSpn.value
-    property alias cfg_lengthMarginsLock: lockItem.locked
+    property alias cfg_lengthMarginsLock: lockBtn.checked
+
+    // read only, written by the applet itself
+    property int cfg_formFactor: PlasmaCore.Types.Horizontal
+    property int cfg_containmentType: AppletDecoration.Types.Plasma
+
+    // Plasma also passes the default of every key
+    property var cfg_useCurrentDecorationDefault
+    property var cfg_selectedPluginDefault
+    property var cfg_selectedSchemeDefault
+    property var cfg_selectedThemeDefault
+    property var cfg_buttonsDefault
+    property var cfg_buttonSizePercentageDefault
+    property var cfg_visibilityDefault
+    property var cfg_filterByScreenDefault
+    property var cfg_hiddenStateDefault
+    property var cfg_inactiveStateEnabledDefault
+    property var cfg_useDecorationMetricsDefault
+    property var cfg_spacingDefault
+    property var cfg_lengthFirstMarginDefault
+    property var cfg_lengthLastMarginDefault
+    property var cfg_lengthMarginsLockDefault
+    property var cfg_formFactorDefault
+    property var cfg_containmentTypeDefault
 
     // used as bridge to communicate properly between configuration and ui
     property bool useCurrent
@@ -56,19 +80,16 @@ Item {
 
     // used from the ui
     readonly property bool selectedDecorationExists: decorations.decorationExists(root.selectedPlugin, root.selectedTheme)
+    readonly property bool isHorizontal: cfg_formFactor !== PlasmaCore.Types.Vertical
 
-    readonly property real centerFactor: 0.3
-    readonly property int minimumWidth: 220
     property string currentPlugin: root.useCurrent || !selectedDecorationExists ? decorations.currentPlugin : root.selectedPlugin
     property string currentTheme: root.useCurrent || !selectedDecorationExists ? decorations.currentTheme : root.selectedTheme
-
-
 
     ///START Decoration Items
     AppletDecoration.Bridge {
         id: bridgeItem
-        plugin: currentPlugin
-        theme: currentTheme
+        plugin: root.currentPlugin
+        theme: root.currentTheme
     }
 
     AppletDecoration.Settings {
@@ -85,7 +106,7 @@ Item {
 
     AppletDecoration.AuroraeTheme {
         id: auroraeThemeEngine
-        theme: isEnabled ? currentTheme : ""
+        theme: isEnabled ? root.currentTheme : ""
 
         readonly property bool isEnabled: decorations.isAurorae(root.currentPlugin, root.currentTheme)
     }
@@ -101,77 +122,38 @@ Item {
     AppletDecoration.PlasmaThemeExtended {
         id: plasmaThemeExtended
 
-        readonly property bool isActive: selectedScheme === "_plasmatheme_"
+        readonly property bool isActive: root.selectedScheme === "_plasmatheme_"
     }
-
-    SystemPalette {
-        id: palette
-    }
-
-    // sort decorations based on display name
-    PlasmaCore.SortFilterModel {
-        id: sortedDecorations
-        sourceModel: decorations
-        sortRole: 'display'
-        sortOrder: Qt.AscendingOrder
-    }
-
     ///END Decoration Items
 
-    ColumnLayout {
-        id:mainColumn
-        spacing: units.largeSpacing
-        Layout.fillWidth: true
+    Kirigami.FormLayout {
+        id: form
 
-        RowLayout{
-            Label {
-                Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                text: i18n("Decoration:")
-                horizontalAlignment: Text.AlignRight
-            }
-
-            DecorationsComboBox{
-                id: decorationCmb
-                Layout.minimumWidth: 180
-                Layout.preferredWidth: 0.2 * root.width
-                Layout.maximumWidth: 300
-            }
+        DecorationsComboBox {
+            id: decorationCmb
+            Kirigami.FormData.label: i18n("Decoration:")
+            Layout.minimumWidth: Kirigami.Units.gridUnit * 14
         }
 
-        RowLayout{
+        ColorsComboBox {
+            id: colorsCmbBox
+            Kirigami.FormData.label: i18n("Colors:")
+            Layout.minimumWidth: Kirigami.Units.gridUnit * 14
             visible: !auroraeThemeEngine.isEnabled
 
-            Label {
-                Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                text: i18n("Colors:")
-                horizontalAlignment: Text.AlignRight
-            }
+            model: colorsModel
+            textRole: "display"
 
-            ColorsComboBox{
-                id:colorsCmbBox
-                Layout.minimumWidth: 250
-                Layout.preferredWidth: 0.3 * root.width
-                Layout.maximumWidth: 380
-
-                model: colorsModel
-                textRole: "display"
-
-                Component.onCompleted: {
-                    currentIndex = colorsModel.indexOf(plasmoid.configuration.selectedScheme);
-                }
+            Component.onCompleted: {
+                currentIndex = colorsModel.indexOf(root.selectedScheme);
             }
         }
 
-        GridLayout{
-            columns: 2
+        ColumnLayout {
+            Kirigami.FormData.label: i18n("Buttons:")
+            spacing: Kirigami.Units.smallSpacing
 
-            Label{
-                Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                text: i18n("Buttons:")
-                horizontalAlignment: Text.AlignRight
-            }
-
-            OrderableListView{
+            OrderableListView {
                 id: activeButtons
                 itemWidth: 38
                 itemHeight: 38
@@ -188,262 +170,158 @@ Item {
                                                                     plasmaThemeExtended.colors.backgroundColor :
                                                                     colorsModel.backgroundOf(colorsCmbBox.currentIndex)
             }
-        }
 
-        GridLayout{
-            columns: 2
-            rows: 4
-            flow: GridLayout.TopToBottom
-
-            Label{
-                Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                Layout.rowSpan: 4
-                Layout.alignment: Qt.AlignTop | Qt.AlignRight
-                text: i18n("Show:")
-                horizontalAlignment: Text.AlignRight
-            }
-
-            ExclusiveGroup { id: visibilityGroup }
-
-            RadioButton{
-                id: alwaysVisibleBtn
-                text: i18n("Always visible")
-                checked: root.visibility === AppletDecoration.Types.AlwaysVisible
-                exclusiveGroup: visibilityGroup
-                onCheckedChanged: {
-                    if (checked) {
-                        root.visibility = AppletDecoration.Types.AlwaysVisible;
-                    }
-                }
-            }
-            RadioButton{
-                id: activeWindowBtn
-                text: i18n("Active window is present")
-                checked: root.visibility === AppletDecoration.Types.ActiveWindow
-                exclusiveGroup: visibilityGroup
-                onCheckedChanged: {
-                    if (checked) {
-                        root.visibility = AppletDecoration.Types.ActiveWindow;
-                    }
-                }
-            }
-            RadioButton{
-                id: activeMaximizedBtn
-                text: plasmoid.configuration.containmentType === AppletDecoration.Types.Latte ?
-                          i18n("Last active window is maximized") : i18n("Active window is maximized")
-                checked: root.visibility === AppletDecoration.Types.ActiveMaximizedWindow
-                exclusiveGroup: visibilityGroup
-                onCheckedChanged: {
-                    if (checked) {
-                        root.visibility = AppletDecoration.Types.ActiveMaximizedWindow;
-                    }
-                }
-            }
-            RadioButton{
-                id: shownWindowBtn
-                text: i18n("At least one window is shown")
-                checked: root.visibility === AppletDecoration.Types.ShownWindowExists
-                exclusiveGroup: visibilityGroup
-                onCheckedChanged: {
-                    if (checked) {
-                        root.visibility = AppletDecoration.Types.ShownWindowExists;
-                    }
-                }
+            QQC2.Label {
+                Layout.fillWidth: true
+                Layout.maximumWidth: Kirigami.Units.gridUnit * 20
+                text: i18n("Press and hold a button, then drag it to reorder. Buttons after the separator are hidden.")
+                font: Kirigami.Theme.smallFont
+                opacity: 0.7
+                wrapMode: Text.Wrap
             }
         }
 
-        GridLayout{
-            columns: 2
-            rows: 2
-            flow: GridLayout.TopToBottom
+        Item {
+            Kirigami.FormData.isSection: true
+        }
 
+        QQC2.ButtonGroup { id: visibilityGroup }
+
+        QQC2.RadioButton {
+            Kirigami.FormData.label: i18n("Show:")
+            text: i18n("Always visible")
+            checked: root.visibility === AppletDecoration.Types.AlwaysVisible
+            QQC2.ButtonGroup.group: visibilityGroup
+            onToggled: if (checked) root.visibility = AppletDecoration.Types.AlwaysVisible
+        }
+        QQC2.RadioButton {
+            text: i18n("Active window is present")
+            checked: root.visibility === AppletDecoration.Types.ActiveWindow
+            QQC2.ButtonGroup.group: visibilityGroup
+            onToggled: if (checked) root.visibility = AppletDecoration.Types.ActiveWindow
+        }
+        QQC2.RadioButton {
+            text: root.cfg_containmentType === AppletDecoration.Types.Latte ?
+                      i18n("Last active window is maximized") : i18n("Active window is maximized")
+            checked: root.visibility === AppletDecoration.Types.ActiveMaximizedWindow
+            QQC2.ButtonGroup.group: visibilityGroup
+            onToggled: if (checked) root.visibility = AppletDecoration.Types.ActiveMaximizedWindow
+        }
+        QQC2.RadioButton {
+            text: i18n("At least one window is shown")
+            checked: root.visibility === AppletDecoration.Types.ShownWindowExists
+            QQC2.ButtonGroup.group: visibilityGroup
+            onToggled: if (checked) root.visibility = AppletDecoration.Types.ShownWindowExists
+        }
+
+        QQC2.ButtonGroup { id: hiddenStateGroup }
+
+        QQC2.RadioButton {
+            Kirigami.FormData.label: i18n("When hidden:")
+            text: i18n("Slide out")
             enabled: root.visibility !== AppletDecoration.Types.AlwaysVisible
+            checked: root.hiddenState === AppletDecoration.Types.SlideOut
+            QQC2.ButtonGroup.group: hiddenStateGroup
+            onToggled: if (checked) root.hiddenState = AppletDecoration.Types.SlideOut
+        }
+        QQC2.RadioButton {
+            text: i18n("Keep the space empty")
+            enabled: root.visibility !== AppletDecoration.Types.AlwaysVisible
+            checked: root.hiddenState === AppletDecoration.Types.EmptySpace
+            QQC2.ButtonGroup.group: hiddenStateGroup
+            onToggled: if (checked) root.hiddenState = AppletDecoration.Types.EmptySpace
+        }
 
-            Label{
-                Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                Layout.rowSpan: 2
-                Layout.alignment: Qt.AlignTop | Qt.AlignRight
-                text: i18n("Hidden State:")
-                horizontalAlignment: Text.AlignRight
+        QQC2.CheckBox {
+            id: byScreenChk
+            Kirigami.FormData.label: i18n("Filters:")
+            text: i18n("Only windows on the current screen")
+        }
+
+        QQC2.CheckBox {
+            id: inactiveChk
+            Kirigami.FormData.label: i18n("Appearance:")
+            text: i18n("Draw inactive buttons when no window is active")
+        }
+
+        Item {
+            Kirigami.FormData.isSection: true
+        }
+
+        QQC2.CheckBox {
+            id: decorationMetricsChk
+            Kirigami.FormData.label: i18n("Metrics:")
+            text: i18n("Use size and spacing from the decoration")
+            visible: auroraeThemeEngine.isEnabled
+        }
+
+        QQC2.SpinBox {
+            id: buttonSizeSpn
+            Kirigami.FormData.label: i18n("Size:")
+            from: 40
+            to: 100
+            enabled: !(auroraeThemeEngine.isEnabled && decorationMetricsChk.checked)
+            textFromValue: function(value) { return i18nc("percentage", "%1 %", value); }
+            valueFromText: function(text) { return parseInt(text); }
+        }
+
+        QQC2.SpinBox {
+            id: spacingSpn
+            Kirigami.FormData.label: i18n("Spacing:")
+            from: 0
+            to: 24
+            enabled: !(auroraeThemeEngine.isEnabled && decorationMetricsChk.checked)
+            textFromValue: function(value) { return i18nc("pixels", "%1 px", value); }
+            valueFromText: function(text) { return parseInt(text); }
+        }
+
+        QQC2.SpinBox {
+            id: lengthFirstSpn
+            Kirigami.FormData.label: root.isHorizontal ? i18n("Left margin:") : i18n("Top margin:")
+            from: 0
+            to: 24
+            textFromValue: function(value) { return i18nc("pixels", "%1 px", value); }
+            valueFromText: function(text) { return parseInt(text); }
+
+            //! valueChanged is emitted before valueModified, so the step of a
+            //! user edit is known when valueModified arrives
+            property int previousValue: 0
+            property int step: 0
+
+            onValueChanged: {
+                step = value - previousValue;
+                previousValue = value;
             }
 
-            ExclusiveGroup { id: hiddenStateGroup }
-
-            RadioButton{
-                id: slideOutBtn
-                text: i18n("Slide out animation")
-                checked: root.hiddenState === AppletDecoration.Types.SlideOut
-                exclusiveGroup: hiddenStateGroup
-                onCheckedChanged: {
-                    if (checked) {
-                        root.hiddenState = AppletDecoration.Types.SlideOut;
-                    }
-                }
-            }
-            RadioButton{
-                id: emptySpaceBtn
-                text: i18n("Preserve as empty space")
-                checked: root.hiddenState === AppletDecoration.Types.EmptySpace
-                exclusiveGroup: hiddenStateGroup
-                onCheckedChanged: {
-                    if (checked) {
-                        root.hiddenState = AppletDecoration.Types.EmptySpace;
-                    }
+            onValueModified: {
+                if (lockBtn.checked) {
+                    lengthLastSpn.value = Math.max(lengthLastSpn.from, Math.min(lengthLastSpn.to, lengthLastSpn.value + step));
                 }
             }
         }
 
-        GridLayout{
-            Label{
-                Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                text: i18n("Filters:")
-                horizontalAlignment: Text.AlignRight
+        RowLayout {
+            Kirigami.FormData.label: root.isHorizontal ? i18n("Right margin:") : i18n("Bottom margin:")
+            spacing: Kirigami.Units.smallSpacing
+
+            QQC2.SpinBox {
+                id: lengthLastSpn
+                from: 0
+                to: 24
+                enabled: !lockBtn.checked
+                textFromValue: function(value) { return i18nc("pixels", "%1 px", value); }
+                valueFromText: function(text) { return parseInt(text); }
             }
 
-            CheckBox{
-                id: byScreenChk
-                text: i18n("Show only for windows in current screen")
-            }
-        }
-
-        GridLayout{
-            columns: 2
-            rows: 2
-            flow: GridLayout.TopToBottom
-
-            Label{
-                Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                Layout.alignment: Qt.AlignTop | Qt.AlignRight
-                Layout.rowSpan: 2
-
-                text: i18n("Appearance:")
-                horizontalAlignment: Text.AlignRight
-            }
-
-            CheckBox{
-                id: inactiveChk
-                text: i18n("Draw buttons inactive state when needed")
-            }
-        }
-
-        ColumnLayout{
-            id: visualSettings
-
-            GridLayout{
-                id: visualSettingsGroup1
-                columns: 2
-
-                Label{
-                    Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                    text: i18n("Metrics:")
-                    horizontalAlignment: Text.AlignRight
-                    visible: auroraeThemeEngine.isEnabled
-                }
-
-                CheckBox{
-                    id: decorationMetricsChk
-                    text: i18n("Use from decoration if any are found")
-                    visible: auroraeThemeEngine.isEnabled
-                }
-
-                Label {
-                    Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                    text: i18n("Size:")
-                    horizontalAlignment: Text.AlignRight
-                    enabled: !(auroraeThemeEngine.isEnabled && decorationMetricsChk.checked)
-                }
-
-                SpinBox{
-                    id: buttonSizeSpn
-                    minimumValue: 40
-                    maximumValue: 100
-                    suffix: " %"
-                    enabled: !(auroraeThemeEngine.isEnabled && decorationMetricsChk.checked)
-                }
-
-                Label{
-                    Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                    text: i18n("Spacing:")
-                    horizontalAlignment: Text.AlignRight
-                    enabled: !(auroraeThemeEngine.isEnabled && decorationMetricsChk.checked)
-                }
-
-                SpinBox{
-                    id: spacingSpn
-                    minimumValue: 0
-                    maximumValue: 24
-                    suffix: " " + i18nc("pixels","px.")
-                    enabled: !(auroraeThemeEngine.isEnabled && decorationMetricsChk.checked)
-                }
-            }
-
-            GridLayout{
-                id: visualSettingsGroup2
-
-                columns: 3
-                rows: 2
-                flow: GridLayout.TopToBottom
-                columnSpacing: visualSettingsGroup1.columnSpacing
-                rowSpacing: visualSettingsGroup1.rowSpacing
-
-                property int lockerHeight: firstLengthLbl.height + rowSpacing/2
-
-                Label{
-                    id: firstLengthLbl
-                    Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                    text: plasmoid.configuration.formFactor===PlasmaCore.Types.Horizontal ?
-                              i18n("Left margin:") : i18n("Top margin:")
-                    horizontalAlignment: Text.AlignRight
-                }
-
-                Label{
-                    Layout.minimumWidth: Math.max(centerFactor * root.width, minimumWidth)
-                    text: plasmoid.configuration.formFactor===PlasmaCore.Types.Horizontal ?
-                              i18n("Right margin:") : i18n("Bottom margin:")
-                    horizontalAlignment: Text.AlignRight
-
-                    enabled: !lockItem.locked
-                }
-
-                SpinBox{
-                    id: lengthFirstSpn
-                    minimumValue: 0
-                    maximumValue: 24
-                    suffix: " " + i18nc("pixels","px.")
-
-                    property int lastValue: -1
-
-                    onValueChanged: {
-                        if (lockItem.locked) {
-                            var step = value - lastValue > 0 ? 1 : -1;
-                            lastValue = value;
-                            lengthLastSpn.value = lengthLastSpn.value + step;
-                        }
-                    }
-
-                    Component.onCompleted: {
-                        lastValue = plasmoid.configuration.lengthFirstMargin;
-                    }
-                }
-
-                SpinBox{
-                    id: lengthLastSpn
-                    minimumValue: 0
-                    maximumValue: 24
-                    suffix: " " + i18nc("pixels","px.")
-                    enabled: !lockItem.locked
-                }
-
-                LockItem{
-                    id: lockItem
-                    Layout.minimumWidth: 40
-                    Layout.maximumWidth: 40
-                    Layout.alignment: Qt.AlignTop | Qt.AlignLeft
-                    Layout.minimumHeight: visualSettingsGroup2.lockerHeight
-                    Layout.maximumHeight: Layout.minimumHeight
-                    Layout.topMargin: firstLengthLbl.height / 2
-                    Layout.rowSpan: 2
-                }
+            QQC2.ToolButton {
+                id: lockBtn
+                checkable: true
+                icon.name: checked ? "object-locked" : "object-unlocked"
+                text: i18n("Link margins")
+                display: QQC2.AbstractButton.IconOnly
+                QQC2.ToolTip.text: checked ? i18n("Margins change together") : i18n("Margins change separately")
+                QQC2.ToolTip.visible: hovered
+                QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
             }
         }
     }

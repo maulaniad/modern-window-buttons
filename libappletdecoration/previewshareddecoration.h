@@ -26,9 +26,10 @@
 #include <QObject>
 
 #include "previewbridge.h"
+#include "previewsettings.h"
 
 
-namespace KDecoration2 {
+namespace KDecoration3 {
 class Decoration;
 }
 
@@ -55,7 +56,7 @@ public:
     Settings *settings() const;
     void setSettings(Settings *settings);
 
-    KDecoration2::Decoration *decoration() const;
+    KDecoration3::Decoration *decoration() const;
 
     void initDecoration();
 
@@ -72,7 +73,7 @@ private Q_SLOTS:
 
 private:
     QPointer<Decoration::Applet::PreviewBridge> m_bridge;
-    QPointer<KDecoration2::Decoration> m_decoration;
+    QPointer<KDecoration3::Decoration> m_decoration;
     QPointer<Decoration::Applet::Settings> m_settings;
 
     QString m_lastPlugin;

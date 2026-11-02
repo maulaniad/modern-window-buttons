@@ -27,9 +27,13 @@
 #include <QMargins>
 #include <QQuickPaintedItem>
 #include <QPointer>
-#include <KDecoration2/DecorationButton>
+#include <KDecoration3/DecorationButton>
 
-namespace KDecoration2 {
+#include "padding.h"
+#include "previewbridge.h"
+#include "previewshareddecoration.h"
+
+namespace KDecoration3 {
 class Decoration;
 }
 
@@ -71,7 +75,7 @@ public:
     SharedDecoration *sharedDecoration() const;
     void setSharedDecoration(SharedDecoration *sharedDecoration);
 
-    KDecoration2::Decoration *decoration() const;
+    KDecoration3::Decoration *decoration() const;
 
     bool isActive() const;
     void setIsActive(bool active);
@@ -91,9 +95,9 @@ public:
     int localY() const;
     void setLocalY(int y);
 
-    KDecoration2::DecorationButtonType type() const;
+    KDecoration3::DecorationButtonType type() const;
     int typeAsInt() const;
-    void setType(KDecoration2::DecorationButtonType type);
+    void setType(KDecoration3::DecorationButtonType type);
     void setType(int type);
 
     QString scheme() const;
@@ -142,18 +146,18 @@ private:
     QPointer<Decoration::Applet::PreviewBridge> m_bridge;
     QPointer<Decoration::Applet::PreviewClient> m_client;
     QPointer<Decoration::Applet::SharedDecoration> m_sharedDecoration;
-    QPointer<KDecoration2::Decoration> m_lastAppliedDecoration;
+    QPointer<KDecoration3::Decoration> m_lastAppliedDecoration;
 
-    KDecoration2::DecorationButton *m_button = nullptr;
-    KDecoration2::DecorationButtonType m_type = KDecoration2::DecorationButtonType::Custom;
+    KDecoration3::DecorationButton *m_button = nullptr;
+    KDecoration3::DecorationButtonType m_type = KDecoration3::DecorationButtonType::Custom;
 
     bool m_isActive{true};
     bool m_isMaximized{false};
     bool m_isOnAllDesktops{false};
     bool m_isKeepAbove{false};
 
-    int m_localX;
-    int m_localY;
+    int m_localX{0};
+    int m_localY{0};
 
     QString m_scheme;
     QRect m_internalGeometry;

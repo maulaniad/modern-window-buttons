@@ -1,35 +1,35 @@
+cmake_minimum_required(VERSION 3.16 FATAL_ERROR)
 project(applet_windowbuttons)
-cmake_minimum_required(VERSION 3.0 FATAL_ERROR)
 
-set(CMAKE_CXX_STANDARD 14)
-set(VERSION 0.11.1)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(VERSION 0.13.0)
 set(AUTHOR "Michail Vourlakos")
 set(EMAIL "mvourlakos@gmail.com")
 
-set(QT_MIN_VERSION "5.15.0")
-set(KF5_MIN_VERSION "5.81.0")
-set(KDECORATION2_MIN_VERSION "5.24.0")
+set(QT_MIN_VERSION "6.6.0")
+set(KF6_MIN_VERSION "6.0.0")
+set(KDECORATION3_MIN_VERSION "6.3.0")
 
-set(KF5_LOCALE_PREFIX "")
+find_package(ECM ${KF6_MIN_VERSION} REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 
-find_package(ECM ${KF5_MIN_VER} REQUIRED NO_MODULE)
-set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR})
-
-find_package(Qt5 ${QT_MIN_VERSION} CONFIG REQUIRED NO_MODULE COMPONENTS Gui Qml Quick)
-find_package(KF5 ${KF5_MIN_VERSION} REQUIRED COMPONENTS CoreAddons Declarative Plasma PlasmaQuick)
-find_package(KDecoration2 ${KDECORATION2_MIN_VERSION} REQUIRED)
-
-include(ECMQMLModules)
-include(CheckIncludeFiles)
-include(KDECMakeSettings)
 include(KDEInstallDirs)
+include(KDECMakeSettings)
+include(KDECompilerSettings NO_POLICY_SCOPE)
 
-set(KDECORATION2_VERSION_MINOR ${KDecoration2_VERSION_MINOR})
+# legacy code base: allow implicit const char* <-> QString conversions
+remove_definitions(
+    -DQT_NO_CAST_FROM_ASCII
+    -DQT_NO_CAST_TO_ASCII
+    -DQT_NO_CAST_FROM_BYTEARRAY
+    -DQT_USE_QSTRINGBUILDER
+)
 
-message(STATUS "KDECORATION2 VERSION MINOR : ${KDECORATION2_VERSION_MINOR}")
-
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/libappletdecoration/config-decoration.h.cmake
-               ${CMAKE_CURRENT_BINARY_DIR}/libappletdecoration/config-decoration.h)
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS Core Gui DBus Qml Quick Widgets)
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS ColorScheme Config CoreAddons I18n Svg)
+find_package(Plasma REQUIRED)
+find_package(KDecoration3 ${KDECORATION3_MIN_VERSION} REQUIRED)
 
 add_subdirectory(libappletdecoration)
 plasma_install_package(package org.kde.windowbuttons)

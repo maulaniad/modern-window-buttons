@@ -1,6 +1,6 @@
 # Window Buttons Applet
 
-This is a Plasma 5 applet that shows window buttons in your panels. This plasmoid is coming from [Latte land](https://phabricator.kde.org/source/latte-dock/repository/master/) but it can also support Plasma panels.
+This is a Plasma 6 applet that shows window buttons in your panels. This plasmoid is coming from [Latte land](https://phabricator.kde.org/source/latte-dock/repository/master/) but it can also support Plasma panels.
 
 <p align="center">
 <img src="https://i.imgur.com/4FItfte.gif" width="580"><br/>
@@ -24,15 +24,13 @@ This is a Plasma 5 applet that shows window buttons in your panels. This plasmoi
 
 # Requires
 
-- Qt >= 5.9
-- KF5 >= 5.38
-- Plasma >= 5.23.2
-- KDecoration2 >= 5.23
+- Qt >= 6.6 (including Qt5Compat.GraphicalEffects at runtime)
+- KDE Frameworks >= 6.0
+- Plasma >= 6.3 (libplasma, KDecoration3)
 
-**Qt elements**: Gui Qml Quick
+**Qt elements**: Core Gui DBus Qml Quick Widgets
 
-**KF5 elements**: CoreAddons Declarative Plasma PlasmaQuick extra-cmake-modules
-
+**KF6 elements**: ColorScheme Config CoreAddons I18n Svg extra-cmake-modules
 
 # Install
 

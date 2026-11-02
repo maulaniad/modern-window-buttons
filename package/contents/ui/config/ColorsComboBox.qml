@@ -17,81 +17,63 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import QtQuick 2.0
-import QtQuick.Controls 1.0
-import QtQuick.Controls 2.2 as Controls22
-import QtQuick.Layouts 1.0
+import QtQuick
+import QtQuick.Controls as QQC2
+import QtQuick.Layouts
 
-Controls22.ComboBox{
+import org.kde.kirigami as Kirigami
+
+QQC2.ComboBox {
     id: combobox
 
-    Connections{
-        target: popup
-        onClosed: root.forceActiveFocus();
+    valueRole: "file"
+
+    onActivated: function(index) {
+        root.selectedScheme = valueAt(index);
     }
 
-    delegate: MouseArea{
-        width: combobox.width
-        height: combobox.height
-        hoverEnabled: true
+    //! MenuItem, because the desktop style shows the popup as a Menu
+    delegate: QQC2.MenuItem {
+        id: colorDelegate
+        text: model.display
+        highlighted: combobox.highlightedIndex === index
 
-        onClicked: {
-            combobox.currentIndex = index;
-            selectedScheme = model.file;
-            combobox.popup.close();
-        }
+        required property int index
+        required property var model
 
-        Rectangle{
-            id:delegateBackground
-            anchors.fill: parent
-            color: {
-                if (containsMouse) {
-                    return palette.highlight;
-                }
-                if (combobox.currentIndex === index) {
-                    return selectedColor;
-                }
+        contentItem: RowLayout {
+            spacing: Kirigami.Units.smallSpacing
 
-                return "transparent";
-            }
+            //! two overlapping squares: background and text color of the scheme
+            Item {
+                Layout.preferredWidth: Kirigami.Units.iconSizes.small * 1.25
+                Layout.preferredHeight: Kirigami.Units.iconSizes.small
+                opacity: (colorDelegate.model.file === "kdeglobals" || colorDelegate.model.file === "_plasmatheme_") ? 0 : 1
 
-            readonly property color selectedColor: Qt.rgba(palette.highlight.r, palette.highlight.g, palette.highlight.b, 0.5);
+                Rectangle {
+                    width: Kirigami.Units.iconSizes.small * 0.75
+                    height: width
+                    color: colorDelegate.model.backgroundColor
+                    border.width: 1
+                    border.color: Kirigami.Theme.textColor
 
-            RowLayout{
-                id: delegateRow
-                height: parent.height
-
-                Item{
-                    Layout.leftMargin: 2
-                    width: 1.25 * label.height
-                    height: label.height
-
-                    opacity: ((file == "kdeglobals") || (file == "_plasmatheme_")) ? 0 : 1
-
-                    Rectangle{
-                        width: height
-                        height: 0.75 * label.height
-                        color: backgroundColor
-                        border.width: 1
-                        border.color: containsMouse  || (combobox.currentIndex === index) ? palette.highlightedText : palette.text
-
-                        Rectangle{
-                            anchors.horizontalCenter: parent.right
-                            anchors.verticalCenter: parent.bottom
-                            width: parent.width
-                            height: parent.height
-                            color: textColor
-                            border.width: parent.border.width
-                            border.color: parent.border.color
-                        }
+                    Rectangle {
+                        x: parent.width / 2
+                        y: parent.height / 2
+                        width: parent.width
+                        height: parent.height
+                        color: colorDelegate.model.textColor
+                        border.width: parent.border.width
+                        border.color: parent.border.color
                     }
                 }
+            }
 
-                Label{
-                    id: label
-                    text:display
-                    color: containsMouse ? palette.highlightedText : palette.text
-                }
+            QQC2.Label {
+                Layout.fillWidth: true
+                text: colorDelegate.model.display
+                color: colorDelegate.highlighted ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor
+                elide: Text.ElideRight
             }
         }
     }

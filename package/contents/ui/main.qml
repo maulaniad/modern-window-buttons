@@ -17,39 +17,45 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import QtQuick 2.7
-import QtQuick.Layouts 1.1
+import QtQuick
+import QtQuick.Layouts
 
-import org.kde.plasma.plasmoid 2.0
-import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.plasma.plasmoid
+import org.kde.plasma.core as PlasmaCore
 
-import org.kde.appletdecoration 0.1 as AppletDecoration
+import org.kde.appletdecoration as AppletDecoration
 
 import "../code/tools.js" as ModelTools
 
-Item {
+PlasmoidItem {
     id: root
     clip: true
 
-    Layout.fillHeight: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? true : false
-    Layout.fillWidth: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? false : true
+    Layout.fillHeight: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? true : false
+    Layout.fillWidth: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? false : true
 
-    Layout.minimumWidth: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? animatedMinimumWidth : -1
-    Layout.minimumHeight: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? -1 : animatedMinimumHeight
+    Layout.minimumWidth: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? animatedMinimumWidth : -1
+    Layout.minimumHeight: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? -1 : animatedMinimumHeight
     Layout.preferredHeight: Layout.minimumHeight
     Layout.preferredWidth: Layout.minimumWidth
     Layout.maximumHeight: Layout.minimumHeight
     Layout.maximumWidth: Layout.minimumWidth
 
-    Plasmoid.preferredRepresentation: Plasmoid.fullRepresentation
-    Plasmoid.onFormFactorChanged: plasmoid.configuration.formFactor = plasmoid.formFactor;
+    preferredRepresentation: fullRepresentation
+
+    Connections {
+        target: Plasmoid
+        function onFormFactorChanged() {
+            Plasmoid.configuration.formFactor = Plasmoid.formFactor;
+        }
+    }
 
     property int animatedMinimumWidth: minimumWidth
     property int animatedMinimumHeight: minimumHeight
 
-    readonly property bool inEditMode: latteInEditMode || plasmoid.userConfiguring
-
-    readonly property bool plasma515: AppletDecoration.Environment.plasmaDesktopVersion >= AppletDecoration.Environment.makeVersion(5,15,0)
+    readonly property bool inEditMode: latteInEditMode
+                                       || Plasmoid.userConfiguring
+                                       || (Plasmoid.containment && Plasmoid.containment.corona && Plasmoid.containment.corona.editMode)
 
     readonly property bool mustHide: {
         if (visibility === AppletDecoration.Types.AlwaysVisible || inEditMode) {
@@ -71,41 +77,41 @@ Item {
         return false;
     }
 
-    readonly property bool selectedDecorationExists: decorations.decorationExists(plasmoid.configuration.selectedPlugin, plasmoid.configuration.selectedTheme)
+    readonly property bool selectedDecorationExists: decorations.decorationExists(Plasmoid.configuration.selectedPlugin, Plasmoid.configuration.selectedTheme)
 
     readonly property bool slideAnimationEnabled: ( (visibility !== AppletDecoration.Types.AlwaysVisible)
-                                                   && (plasmoid.configuration.hiddenState === AppletDecoration.Types.SlideOut) )
-    readonly property bool isEmptySpaceEnabled: plasmoid.configuration.hiddenState === AppletDecoration.Types.EmptySpace
+                                                   && (Plasmoid.configuration.hiddenState === AppletDecoration.Types.SlideOut) )
+    readonly property bool isEmptySpaceEnabled: Plasmoid.configuration.hiddenState === AppletDecoration.Types.EmptySpace
 
-    readonly property int containmentType: plasmoid.configuration.containmentType
-    readonly property int visibility: plasmoid.configuration.visibility
+    readonly property int containmentType: Plasmoid.configuration.containmentType
+    readonly property int visibility: Plasmoid.configuration.visibility
 
     readonly property int minimumWidth: {
-        if (plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
-            if (mustHide && !isEmptySpaceEnabled && slideAnimationEnabled && !plasmoid.userConfiguring && !latteInEditMode){
+        if (Plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
+            if (mustHide && !isEmptySpaceEnabled && slideAnimationEnabled && !Plasmoid.userConfiguring && !latteInEditMode){
                 return 0;
             }
         }
 
-        return plasmoid.formFactor === PlasmaCore.Types.Horizontal ? buttonsArea.width : -1;
+        return Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? buttonsArea.width : -1;
     }
 
     readonly property int minimumHeight: {
-        if (plasmoid.formFactor === PlasmaCore.Types.Vertical) {
-            if (mustHide && !isEmptySpaceEnabled && slideAnimationEnabled && !plasmoid.userConfiguring && !latteInEditMode){
+        if (Plasmoid.formFactor === PlasmaCore.Types.Vertical) {
+            if (mustHide && !isEmptySpaceEnabled && slideAnimationEnabled && !Plasmoid.userConfiguring && !latteInEditMode){
                 return 0;
             }
         }
 
-        return plasmoid.formFactor === PlasmaCore.Types.Horizontal ? -1 : buttonsArea.height
+        return Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? -1 : buttonsArea.height
     }
 
-    readonly property string buttonsStr: plasmoid.configuration.buttons
+    readonly property string buttonsStr: Plasmoid.configuration.buttons
 
     Plasmoid.status: {
         if (mustHide && !isEmptySpaceEnabled) {
-            if ((plasmoid.formFactor === PlasmaCore.Types.Horizontal && animatedMinimumWidth === 0)
-                    || (plasmoid.formFactor === PlasmaCore.Types.Vertical && animatedMinimumHeight === 0)) {
+            if ((Plasmoid.formFactor === PlasmaCore.Types.Horizontal && animatedMinimumWidth === 0)
+                    || (Plasmoid.formFactor === PlasmaCore.Types.Vertical && animatedMinimumHeight === 0)) {
                 return PlasmaCore.Types.HiddenStatus;
             }
         }
@@ -114,45 +120,45 @@ Item {
     }
 
     // START visual properties
-    property bool inactiveStateEnabled: inEditMode ? false : plasmoid.configuration.inactiveStateEnabled
+    property bool inactiveStateEnabled: inEditMode ? false : Plasmoid.configuration.inactiveStateEnabled
 
     property int thickPadding: {
-        if (auroraeThemeEngine.isEnabled && plasmoid.configuration.useDecorationMetrics) {
-            return plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
+        if (auroraeThemeEngine.isEnabled && Plasmoid.configuration.useDecorationMetrics) {
+            return Plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
                         ((root.height - auroraeThemeEngine.buttonHeight) / 2) - 1 :
                         ((root.width - auroraeThemeEngine.buttonHeight) / 2) - 1;
         }
 
         //! Latte padding
         if (inLatte) {
-            if (plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
-                return (root.height - (latteBridge.iconSize * (plasmoid.configuration.buttonSizePercentage/100))) / 2;
+            if (Plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
+                return (root.height - (latteBridge.iconSize * (Plasmoid.configuration.buttonSizePercentage/100))) / 2;
             } else {
-                return (root.width - (latteBridge.iconSize * (plasmoid.configuration.buttonSizePercentage/100))) / 2;
+                return (root.width - (latteBridge.iconSize * (Plasmoid.configuration.buttonSizePercentage/100))) / 2;
             }
         }
 
         //! Plasma panels code
-        if (plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
-            return (root.height - (root.height * (plasmoid.configuration.buttonSizePercentage/100))) / 2;
+        if (Plasmoid.formFactor === PlasmaCore.Types.Horizontal) {
+            return (root.height - (root.height * (Plasmoid.configuration.buttonSizePercentage/100))) / 2;
         } else {
-            return (root.width - (root.width * (plasmoid.configuration.buttonSizePercentage/100))) / 2;
+            return (root.width - (root.width * (Plasmoid.configuration.buttonSizePercentage/100))) / 2;
         }
     }
 
-    property int lengthFirstMargin: plasmoid.configuration.lengthFirstMargin
-    property int lengthLastMargin: plasmoid.configuration.lengthLastMargin
+    property int lengthFirstMargin: Plasmoid.configuration.lengthFirstMargin
+    property int lengthLastMargin: Plasmoid.configuration.lengthLastMargin
 
     property int lengthFirstPadding: Math.min(lengthFirstMargin, lengthMidPadding)
     property int lengthMidPadding: spacing / 2
     property int lengthLastPadding: Math.min(lengthLastMargin, lengthMidPadding)
 
     property int spacing: {
-        if (auroraeThemeEngine.isEnabled && plasmoid.configuration.useDecorationMetrics) {
+        if (auroraeThemeEngine.isEnabled && Plasmoid.configuration.useDecorationMetrics) {
             return auroraeThemeEngine.buttonSpacing;
         }
 
-        return plasmoid.configuration.spacing;
+        return Plasmoid.configuration.spacing;
     }
     // END visual properties
 
@@ -180,26 +186,26 @@ Item {
     readonly property bool inPlasmaPanel: latteBridge === null
     readonly property bool inLatte: latteBridge !== null
 
-    readonly property Item lastActiveTaskItem: windowInfoLoader.item.lastActiveTaskItem
+    readonly property Item lastActiveTaskItem: windowInfoLoader.item ? windowInfoLoader.item.lastActiveTaskItem : null
     // END Window properties
 
     // START decoration properties
-    property string currentPlugin: plasmoid.configuration.useCurrentDecoration || !selectedDecorationExists ?
-                                       decorations.currentPlugin : plasmoid.configuration.selectedPlugin
-    property string currentTheme: plasmoid.configuration.useCurrentDecoration || !selectedDecorationExists ?
-                                      decorations.currentTheme : plasmoid.configuration.selectedTheme
+    property string currentPlugin: Plasmoid.configuration.useCurrentDecoration || !selectedDecorationExists ?
+                                       decorations.currentPlugin : Plasmoid.configuration.selectedPlugin
+    property string currentTheme: Plasmoid.configuration.useCurrentDecoration || !selectedDecorationExists ?
+                                      decorations.currentTheme : Plasmoid.configuration.selectedTheme
     property string currentScheme: {
         if (plasmaThemeExtended.isActive) {
             return plasmaThemeExtended.colors.schemeFile;
         }
 
-        if (enforceLattePalette && plasmoid.configuration.selectedScheme === "kdeglobals") {
+        if (enforceLattePalette && Plasmoid.configuration.selectedScheme === "kdeglobals") {
             return latteBridge.palette.scheme;
         }
 
-        return plasmoid.configuration.selectedScheme === "kdeglobals" ?
+        return Plasmoid.configuration.selectedScheme === "kdeglobals" ?
                     colorsModel.defaultSchemeFile() :
-                    plasmoid.configuration.selectedScheme
+                    Plasmoid.configuration.selectedScheme
     }
     // END decoration properties
 
@@ -208,9 +214,9 @@ Item {
 
     onLatteBridgeChanged: {
         if (latteBridge) {
-            plasmoid.configuration.containmentType = AppletDecoration.Types.Latte;
-            latteBridge.actions.setProperty(plasmoid.id, "latteSideColoringEnabled", false);
-            latteBridge.actions.setProperty(plasmoid.id, "windowsTrackingEnabled", true);
+            Plasmoid.configuration.containmentType = AppletDecoration.Types.Latte;
+            latteBridge.actions.setProperty(Plasmoid.id, "latteSideColoringEnabled", false);
+            latteBridge.actions.setProperty(Plasmoid.id, "windowsTrackingEnabled", true);
         }
     }
     //END  Latte Dock Communicator
@@ -225,7 +231,7 @@ Item {
 
     //START Behaviors
     Behavior on animatedMinimumWidth {
-        enabled: slideAnimationEnabled && plasmoid.formFactor===PlasmaCore.Types.Horizontal
+        enabled: slideAnimationEnabled && Plasmoid.formFactor===PlasmaCore.Types.Horizontal
         NumberAnimation {
             duration: 250
             easing.type: Easing.InCubic
@@ -233,7 +239,7 @@ Item {
     }
 
     Behavior on animatedMinimumHeight {
-        enabled: slideAnimationEnabled && plasmoid.formFactor===PlasmaCore.Types.Vertical
+        enabled: slideAnimationEnabled && Plasmoid.formFactor===PlasmaCore.Types.Vertical
         NumberAnimation {
             duration: 250
             easing.type: Easing.InCubic
@@ -245,18 +251,22 @@ Item {
 
     Connections {
         target: bridgeItem
-        onPluginChanged: initButtons();
+        function onPluginChanged() {
+            root.initButtons();
+        }
     }
 
     Connections {
         target: buttonsRepeater
-        onCountChanged: discoverButtons();
+        function onCountChanged() {
+            root.discoverButtons();
+        }
     }
 
     Component.onCompleted: {
-        if (plasmoid.configuration.buttons.indexOf("9") === -1) {
+        if (Plasmoid.configuration.buttons.indexOf("9") === -1) {
             //add new supported buttons if they dont exist in the configuration
-            plasmoid.configuration.buttons = plasmoid.configuration.buttons.concat("|9");
+            Plasmoid.configuration.buttons = Plasmoid.configuration.buttons.concat("|9");
         }
 
         initButtons();
@@ -280,14 +290,14 @@ Item {
         Component{
             id: latteTrackerComponent
             LatteWindowsTracker{
-                filterByScreen: plasmoid.configuration.filterByScreen
+                filterByScreen: Plasmoid.configuration.filterByScreen
             }
         }
 
         Component{
             id: plasmaTasksModel
             PlasmaTasksModel{
-                filterByScreen: plasmoid.configuration.filterByScreen
+                filterByScreen: Plasmoid.configuration.filterByScreen
             }
         }
     }
@@ -324,7 +334,7 @@ Item {
     AppletDecoration.PlasmaThemeExtended {
         id: plasmaThemeExtended
 
-        readonly property bool isActive: plasmoid.configuration.selectedScheme === "_plasmatheme_"
+        readonly property bool isActive: Plasmoid.configuration.selectedScheme === "_plasmatheme_"
     }
 
     AppletDecoration.AuroraeTheme {
@@ -396,17 +406,17 @@ Item {
         rowSpacing: 0
         columnSpacing: 0
 
-        rows: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? 1 : 0
-        columns: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? 0 : 1
+        rows: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? 1 : 0
+        columns: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? 0 : 1
 
-        readonly property int buttonThickness: plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
+        readonly property int buttonThickness: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
                                                    root.height - 2 * thickPadding :
                                                    root.width - 2 * thickPadding
 
         opacity: mustHide
                  && !inEditMode
                  && (!root.slideAnimationEnabled /*when buttons are not sliding out*/
-                     || (root.slideAnimationEnabled && plasmoid.status === PlasmaCore.Types.HiddenStatus/*wait for slide-out animation*/)) ? 0 : 1
+                     || (root.slideAnimationEnabled && Plasmoid.status === PlasmaCore.Types.HiddenStatus/*wait for slide-out animation*/)) ? 0 : 1
         visible: opacity === 0 ? false : true
 
        /* Behavior on opacity {
@@ -428,11 +438,11 @@ Item {
         id: pluginButton
         AppletDecoration.Button {
             id: cButton
-            width: plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
+            width: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
                        buttonsArea.buttonThickness + padding.left + padding.right :
                        buttonsArea.buttonThickness + 2 * thickPadding
 
-            height: plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
+            height: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
                         buttonsArea.buttonThickness + 2 * thickPadding :
                         buttonsArea.buttonThickness + padding.top + padding.bottom
 
@@ -499,10 +509,10 @@ Item {
             }
 
             padding{
-                left: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? firstPadding : thickPadding
-                right: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? lastPadding : thickPadding
-                top: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? thickPadding : firstPadding
-                bottom: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? thickPadding : lastPadding
+                left: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? firstPadding : thickPadding
+                right: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? lastPadding : thickPadding
+                top: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? thickPadding : firstPadding
+                bottom: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? thickPadding : lastPadding
             }
 
             onClicked: {
@@ -533,11 +543,11 @@ Item {
         id: auroraeButton
         AppletDecoration.AuroraeButton {
             id: aButton
-            width: plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
+            width: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
                        auroraeTheme.buttonRatio*buttonsArea.buttonThickness + leftPadding + rightPadding :
                        buttonsArea.buttonThickness + 2 * thickPadding
 
-            height: plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
+            height: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ?
                         buttonsArea.buttonThickness + 2 * thickPadding :
                         buttonsArea.buttonThickness + topPadding + bottomPadding
 
@@ -559,10 +569,10 @@ Item {
                 }
             }
 
-            leftPadding: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? firstPadding : thickPadding
-            rightPadding: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? lastPadding : thickPadding
-            topPadding: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? thickPadding : firstPadding
-            bottomPadding: plasmoid.formFactor === PlasmaCore.Types.Horizontal ? thickPadding : lastPadding
+            leftPadding: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? firstPadding : thickPadding
+            rightPadding: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? lastPadding : thickPadding
+            topPadding: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? thickPadding : firstPadding
+            bottomPadding: Plasmoid.formFactor === PlasmaCore.Types.Horizontal ? thickPadding : lastPadding
 
             isActive: {
                 //!   FIXME-TEST PERIOD: Disabled because it shows an error from c++ theme when its value is changed
@@ -645,9 +655,9 @@ Item {
         interval: 5000
         onTriggered: {
             if (latteBridge) {
-                plasmoid.configuration.containmentType = AppletDecoration.Types.Latte;
+                Plasmoid.configuration.containmentType = AppletDecoration.Types.Latte;
             } else {
-                plasmoid.configuration.containmentType = AppletDecoration.Types.Plasma;
+                Plasmoid.configuration.containmentType = AppletDecoration.Types.Plasma;
             }
         }
     }

@@ -58,13 +58,15 @@ public:
 public Q_SLOTS:
     Q_INVOKABLE bool decorationExists(const QString &plugin, const QString &theme);
     Q_INVOKABLE bool isAurorae(const QString &plugin, const QString &theme);
+    //! returns {display, plugin, theme, isAuroraeTheme, configureable} of a row
+    Q_INVOKABLE QVariantMap get(int row) const;
 
-signals:
+Q_SIGNALS:
     void countChanged();
     void currentThemeChanged();
     void currentPluginChanged();
 
-private slots:
+private Q_SLOTS:
     void init();
     void loadCurrents();
     void kwinChanged(const QString &filename);

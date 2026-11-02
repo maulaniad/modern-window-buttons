@@ -1,5 +1,14 @@
 ### CHANGELOG
 
+#### Version 0.13.0
+
+* port to Plasma 6.3+: Qt 6, KDE Frameworks 6, libplasma 6 and KDecoration3
+* find decoration plugins through KPluginMetaData (org.kde.kdecoration3), support Aurorae SVG themes served by org.kde.kwin.aurorae.v2
+* rewrite the settings page with Kirigami FormLayout and QtQuick Controls 2
+* fix "on all desktops" button not being able to unpin a window
+* fix hover tracking using the horizontal position for the vertical axis
+* read/write KWin's BorderlessMaximizedWindows through KConfig instead of kreadconfig5/kwriteconfig5
+
 #### Version 0.11.0
 
 * support Plasma 5.24 way of discovering themes from theme engines

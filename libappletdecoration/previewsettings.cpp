@@ -49,7 +49,7 @@ QVariant BorderSizesModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    return QVariant::fromValue<KDecoration2::BorderSize>(m_borders.at(index.row()));
+    return QVariant::fromValue<KDecoration3::BorderSize>(m_borders.at(index.row()));
 }
 
 int BorderSizesModel::rowCount(const QModelIndex &parent) const
@@ -68,45 +68,45 @@ QHash< int, QByteArray > BorderSizesModel::roleNames() const
     return roles;
 }
 
-PreviewSettings::PreviewSettings(KDecoration2::DecorationSettings *parent)
+PreviewSettings::PreviewSettings(KDecoration3::DecorationSettings *parent)
     : QObject()
-    , KDecoration2::DecorationSettingsPrivate(parent)
+    , KDecoration3::DecorationSettingsPrivateV2(parent)
     , m_alphaChannelSupported(true)
     , m_onAllDesktopsAvailable(true)
     , m_closeOnDoubleClick(false)
-    , m_leftButtons(new ButtonsModel(QVector<KDecoration2::DecorationButtonType>({
-    KDecoration2::DecorationButtonType::Minimize,
-    KDecoration2::DecorationButtonType::Close,
-    KDecoration2::DecorationButtonType::Menu,
-    KDecoration2::DecorationButtonType::ApplicationMenu,
-    KDecoration2::DecorationButtonType::OnAllDesktops
+    , m_leftButtons(new ButtonsModel(QList<KDecoration3::DecorationButtonType>({
+    KDecoration3::DecorationButtonType::Minimize,
+    KDecoration3::DecorationButtonType::Close,
+    KDecoration3::DecorationButtonType::Menu,
+    KDecoration3::DecorationButtonType::ApplicationMenu,
+    KDecoration3::DecorationButtonType::OnAllDesktops
 }), this))
-, m_rightButtons(new ButtonsModel(QVector<KDecoration2::DecorationButtonType>({
-    KDecoration2::DecorationButtonType::ContextHelp,
-    KDecoration2::DecorationButtonType::Minimize,
-    KDecoration2::DecorationButtonType::Maximize,
-    KDecoration2::DecorationButtonType::Close
+, m_rightButtons(new ButtonsModel(QList<KDecoration3::DecorationButtonType>({
+    KDecoration3::DecorationButtonType::ContextHelp,
+    KDecoration3::DecorationButtonType::Minimize,
+    KDecoration3::DecorationButtonType::Maximize,
+    KDecoration3::DecorationButtonType::Close
 }), this))
-, m_availableButtons(new ButtonsModel(QVector<KDecoration2::DecorationButtonType>({
-    KDecoration2::DecorationButtonType::Menu,
-    KDecoration2::DecorationButtonType::ApplicationMenu,
-    KDecoration2::DecorationButtonType::OnAllDesktops,
-    KDecoration2::DecorationButtonType::Minimize,
-    KDecoration2::DecorationButtonType::Maximize,
-    KDecoration2::DecorationButtonType::Close,
-    KDecoration2::DecorationButtonType::ContextHelp,
-    KDecoration2::DecorationButtonType::Shade,
-    KDecoration2::DecorationButtonType::KeepBelow,
-    KDecoration2::DecorationButtonType::KeepAbove
+, m_availableButtons(new ButtonsModel(QList<KDecoration3::DecorationButtonType>({
+    KDecoration3::DecorationButtonType::Menu,
+    KDecoration3::DecorationButtonType::ApplicationMenu,
+    KDecoration3::DecorationButtonType::OnAllDesktops,
+    KDecoration3::DecorationButtonType::Minimize,
+    KDecoration3::DecorationButtonType::Maximize,
+    KDecoration3::DecorationButtonType::Close,
+    KDecoration3::DecorationButtonType::ContextHelp,
+    KDecoration3::DecorationButtonType::Shade,
+    KDecoration3::DecorationButtonType::KeepBelow,
+    KDecoration3::DecorationButtonType::KeepAbove
 }), this))
 , m_borderSizes(new BorderSizesModel(this))
-, m_borderSize(int(KDecoration2::BorderSize::Normal))
+, m_borderSize(int(KDecoration3::BorderSize::Normal))
 , m_font(QFontDatabase::systemFont(QFontDatabase::TitleFont))
 {
-    connect(this, &PreviewSettings::alphaChannelSupportedChanged, parent, &KDecoration2::DecorationSettings::alphaChannelSupportedChanged);
-    connect(this, &PreviewSettings::onAllDesktopsAvailableChanged, parent, &KDecoration2::DecorationSettings::onAllDesktopsAvailableChanged);
-    connect(this, &PreviewSettings::closeOnDoubleClickOnMenuChanged, parent, &KDecoration2::DecorationSettings::closeOnDoubleClickOnMenuChanged);
-    connect(this, &PreviewSettings::fontChanged, parent, &KDecoration2::DecorationSettings::fontChanged);
+    connect(this, &PreviewSettings::alphaChannelSupportedChanged, parent, &KDecoration3::DecorationSettings::alphaChannelSupportedChanged);
+    connect(this, &PreviewSettings::onAllDesktopsAvailableChanged, parent, &KDecoration3::DecorationSettings::onAllDesktopsAvailableChanged);
+    connect(this, &PreviewSettings::closeOnDoubleClickOnMenuChanged, parent, &KDecoration3::DecorationSettings::closeOnDoubleClickOnMenuChanged);
+    connect(this, &PreviewSettings::fontChanged, parent, &KDecoration3::DecorationSettings::fontChanged);
     auto updateLeft = [this, parent]() {
         parent->decorationButtonsLeftChanged(decorationButtonsLeft());
     };
@@ -155,7 +155,7 @@ void PreviewSettings::setAlphaChannelSupported(bool supported)
     }
 
     m_alphaChannelSupported = supported;
-    emit alphaChannelSupportedChanged(m_alphaChannelSupported);
+    Q_EMIT alphaChannelSupportedChanged(m_alphaChannelSupported);
 }
 
 void PreviewSettings::setOnAllDesktopsAvailable(bool available)
@@ -165,7 +165,7 @@ void PreviewSettings::setOnAllDesktopsAvailable(bool available)
     }
 
     m_onAllDesktopsAvailable = available;
-    emit onAllDesktopsAvailableChanged(m_onAllDesktopsAvailable);
+    Q_EMIT onAllDesktopsAvailableChanged(m_onAllDesktopsAvailable);
 }
 
 void PreviewSettings::setCloseOnDoubleClickOnMenu(bool enabled)
@@ -175,15 +175,15 @@ void PreviewSettings::setCloseOnDoubleClickOnMenu(bool enabled)
     }
 
     m_closeOnDoubleClick = enabled;
-    emit closeOnDoubleClickOnMenuChanged(enabled);
+    Q_EMIT closeOnDoubleClickOnMenuChanged(enabled);
 }
 
-QVector< KDecoration2::DecorationButtonType > PreviewSettings::decorationButtonsLeft() const
+QList<KDecoration3::DecorationButtonType> PreviewSettings::decorationButtonsLeft() const
 {
     return m_leftButtons->buttons();
 }
 
-QVector< KDecoration2::DecorationButtonType > PreviewSettings::decorationButtonsRight() const
+QList<KDecoration3::DecorationButtonType> PreviewSettings::decorationButtonsRight() const
 {
     return m_rightButtons->buttons();
 }
@@ -196,7 +196,7 @@ void PreviewSettings::addButtonToLeft(int row)
         return;
     }
 
-    m_leftButtons->add(index.data(Qt::UserRole).value<KDecoration2::DecorationButtonType>());
+    m_leftButtons->add(index.data(Qt::UserRole).value<KDecoration3::DecorationButtonType>());
 }
 
 void PreviewSettings::addButtonToRight(int row)
@@ -207,7 +207,7 @@ void PreviewSettings::addButtonToRight(int row)
         return;
     }
 
-    m_rightButtons->add(index.data(Qt::UserRole).value<KDecoration2::DecorationButtonType>());
+    m_rightButtons->add(index.data(Qt::UserRole).value<KDecoration3::DecorationButtonType>());
 }
 
 void PreviewSettings::setBorderSizesIndex(int index)
@@ -217,13 +217,13 @@ void PreviewSettings::setBorderSizesIndex(int index)
     }
 
     m_borderSize = index;
-    emit borderSizesIndexChanged(index);
-    emit decorationSettings()->borderSizeChanged(borderSize());
+    Q_EMIT borderSizesIndexChanged(index);
+    Q_EMIT decorationSettings()->borderSizeChanged(borderSize());
 }
 
-KDecoration2::BorderSize PreviewSettings::borderSize() const
+KDecoration3::BorderSize PreviewSettings::borderSize() const
 {
-    return m_borderSizes->index(m_borderSize).data(Qt::UserRole).value<KDecoration2::BorderSize>();
+    return m_borderSizes->index(m_borderSize).data(Qt::UserRole).value<KDecoration3::BorderSize>();
 }
 
 void PreviewSettings::setFont(const QFont &font)
@@ -233,7 +233,7 @@ void PreviewSettings::setFont(const QFont &font)
     }
 
     m_font = font;
-    emit fontChanged(m_font);
+    Q_EMIT fontChanged(m_font);
 }
 
 Settings::Settings(QObject *parent)
@@ -251,7 +251,7 @@ void Settings::setBridge(PreviewBridge *bridge)
     }
 
     m_bridge = bridge;
-    emit bridgeChanged();
+    Q_EMIT bridgeChanged();
 }
 
 PreviewBridge *Settings::bridge() const
@@ -262,25 +262,25 @@ PreviewBridge *Settings::bridge() const
 void Settings::createSettings()
 {
     if (m_bridge.isNull()) {
-        m_settings.clear();
+        m_settings.reset();
     } else {
-        m_settings = QSharedPointer<KDecoration2::DecorationSettings>::create(m_bridge.data());
+        m_settings = std::make_shared<KDecoration3::DecorationSettings>(m_bridge.data());
         m_previewSettings = m_bridge->lastCreatedSettings();
         m_previewSettings->setBorderSizesIndex(m_borderSize);
         connect(this, &Settings::borderSizesIndexChanged, m_previewSettings, &PreviewSettings::setBorderSizesIndex);
     }
 
-    emit settingsChanged();
+    Q_EMIT settingsChanged();
 }
 
-QSharedPointer<KDecoration2::DecorationSettings> Settings::settings() const
+std::shared_ptr<KDecoration3::DecorationSettings> Settings::settings() const
 {
     return m_settings;
 }
 
-KDecoration2::DecorationSettings *Settings::settingsPointer() const
+KDecoration3::DecorationSettings *Settings::settingsPointer() const
 {
-    return m_settings.data();
+    return m_settings.get();
 }
 
 void Settings::setBorderSizesIndex(int index)
@@ -290,7 +290,7 @@ void Settings::setBorderSizesIndex(int index)
     }
 
     m_borderSize = index;
-    emit borderSizesIndexChanged(m_borderSize);
+    Q_EMIT borderSizesIndexChanged(m_borderSize);
 }
 
 }

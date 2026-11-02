@@ -22,8 +22,8 @@
  */
 
 #include "previewclient.h"
-#include <KDecoration2/Decoration>
-#include <KDecoration2/DecoratedClient>
+#include <KDecoration3/Decoration>
+#include <KDecoration3/DecoratedWindow>
 
 #include <QDebug>
 #include <QCoreApplication>
@@ -33,9 +33,9 @@
 namespace Decoration {
 namespace Applet {
 
-PreviewClient::PreviewClient(KDecoration2::DecoratedClient *c, KDecoration2::Decoration *decoration)
+PreviewClient::PreviewClient(KDecoration3::DecoratedWindow *c, KDecoration3::Decoration *decoration)
     : QObject(decoration)
-    , ApplicationMenuEnabledDecoratedClientPrivate(c, decoration)
+    , DecoratedWindowPrivateV4(c, decoration)
     , m_icon(QIcon::fromTheme(QStringLiteral("start-here-kde")))
     , m_iconName(m_icon.name())
     //  , m_palette(new KWin::Decoration::DecorationPalette(QStringLiteral("kdeglobals")))
@@ -61,64 +61,68 @@ PreviewClient::PreviewClient(KDecoration2::DecoratedClient *c, KDecoration2::Dec
     , m_bordersRightEdge(false)
     , m_bordersBottomEdge(false)
 {
-    connect(this, &PreviewClient::captionChanged,               c, &KDecoration2::DecoratedClient::captionChanged);
-    connect(this, &PreviewClient::activeChanged,                c, &KDecoration2::DecoratedClient::activeChanged);
-    connect(this, &PreviewClient::closeableChanged,             c, &KDecoration2::DecoratedClient::closeableChanged);
-    connect(this, &PreviewClient::keepAboveChanged,             c, &KDecoration2::DecoratedClient::keepAboveChanged);
-    connect(this, &PreviewClient::keepBelowChanged,             c, &KDecoration2::DecoratedClient::keepBelowChanged);
-    connect(this, &PreviewClient::maximizableChanged,           c, &KDecoration2::DecoratedClient::maximizeableChanged);
-    connect(this, &PreviewClient::maximizedChanged,             c, &KDecoration2::DecoratedClient::maximizedChanged);
-    connect(this, &PreviewClient::maximizedVerticallyChanged,   c, &KDecoration2::DecoratedClient::maximizedVerticallyChanged);
-    connect(this, &PreviewClient::maximizedHorizontallyChanged, c, &KDecoration2::DecoratedClient::maximizedHorizontallyChanged);
-    connect(this, &PreviewClient::minimizableChanged,           c, &KDecoration2::DecoratedClient::minimizeableChanged);
-    //         connect(this, &PreviewClient::modalChanged, c, &DecoratedClient::modalChanged);
-    connect(this, &PreviewClient::movableChanged,               c, &KDecoration2::DecoratedClient::moveableChanged);
-    connect(this, &PreviewClient::onAllDesktopsChanged,         c, &KDecoration2::DecoratedClient::onAllDesktopsChanged);
-    connect(this, &PreviewClient::resizableChanged,             c, &KDecoration2::DecoratedClient::resizeableChanged);
-    connect(this, &PreviewClient::shadeableChanged,             c, &KDecoration2::DecoratedClient::shadeableChanged);
-    connect(this, &PreviewClient::shadedChanged,                c, &KDecoration2::DecoratedClient::shadedChanged);
-    connect(this, &PreviewClient::providesContextHelpChanged,   c, &KDecoration2::DecoratedClient::providesContextHelpChanged);
-    //    connect(this, &PreviewClient::onAllDesktopsChanged,         c, &KDecoration2::DecoratedClient::onAllDesktopsChanged);
-    connect(this, &PreviewClient::widthChanged,                 c, &KDecoration2::DecoratedClient::widthChanged);
-    connect(this, &PreviewClient::heightChanged,                c, &KDecoration2::DecoratedClient::heightChanged);
-    connect(this, &PreviewClient::iconChanged,                  c, &KDecoration2::DecoratedClient::iconChanged);
-    connect(this, &PreviewClient::paletteChanged,               c, &KDecoration2::DecoratedClient::paletteChanged);
-    //         connect(this, &PreviewClient::, c, &DecoratedClient::);
+    connect(this, &PreviewClient::captionChanged,               c, &KDecoration3::DecoratedWindow::captionChanged);
+    connect(this, &PreviewClient::activeChanged,                c, &KDecoration3::DecoratedWindow::activeChanged);
+    connect(this, &PreviewClient::closeableChanged,             c, &KDecoration3::DecoratedWindow::closeableChanged);
+    connect(this, &PreviewClient::keepAboveChanged,             c, &KDecoration3::DecoratedWindow::keepAboveChanged);
+    connect(this, &PreviewClient::keepBelowChanged,             c, &KDecoration3::DecoratedWindow::keepBelowChanged);
+    connect(this, &PreviewClient::excludeFromCaptureChanged,    c, &KDecoration3::DecoratedWindow::excludeFromCaptureChanged);
+    connect(this, &PreviewClient::maximizableChanged,           c, &KDecoration3::DecoratedWindow::maximizeableChanged);
+    connect(this, &PreviewClient::maximizedChanged,             c, &KDecoration3::DecoratedWindow::maximizedChanged);
+    connect(this, &PreviewClient::maximizedVerticallyChanged,   c, &KDecoration3::DecoratedWindow::maximizedVerticallyChanged);
+    connect(this, &PreviewClient::maximizedHorizontallyChanged, c, &KDecoration3::DecoratedWindow::maximizedHorizontallyChanged);
+    connect(this, &PreviewClient::minimizableChanged,           c, &KDecoration3::DecoratedWindow::minimizeableChanged);
+    //         connect(this, &PreviewClient::modalChanged, c, &DecoratedWindow::modalChanged);
+    connect(this, &PreviewClient::movableChanged,               c, &KDecoration3::DecoratedWindow::moveableChanged);
+    connect(this, &PreviewClient::onAllDesktopsChanged,         c, &KDecoration3::DecoratedWindow::onAllDesktopsChanged);
+    connect(this, &PreviewClient::resizableChanged,             c, &KDecoration3::DecoratedWindow::resizeableChanged);
+    connect(this, &PreviewClient::shadeableChanged,             c, &KDecoration3::DecoratedWindow::shadeableChanged);
+    connect(this, &PreviewClient::shadedChanged,                c, &KDecoration3::DecoratedWindow::shadedChanged);
+    connect(this, &PreviewClient::providesContextHelpChanged,   c, &KDecoration3::DecoratedWindow::providesContextHelpChanged);
+    //    connect(this, &PreviewClient::onAllDesktopsChanged,         c, &KDecoration3::DecoratedWindow::onAllDesktopsChanged);
+    connect(this, &PreviewClient::widthChanged,                 c, &KDecoration3::DecoratedWindow::widthChanged);
+    connect(this, &PreviewClient::heightChanged,                c, &KDecoration3::DecoratedWindow::heightChanged);
+    connect(this, &PreviewClient::iconChanged,                  c, &KDecoration3::DecoratedWindow::iconChanged);
+    connect(this, &PreviewClient::paletteChanged,               c, &KDecoration3::DecoratedWindow::paletteChanged);
+    //         connect(this, &PreviewClient::, c, &DecoratedWindow::);
     connect(this, &PreviewClient::maximizedVerticallyChanged, this,
             [this]() {
-        emit maximizedChanged(isMaximized());
+        Q_EMIT maximizedChanged(isMaximized());
     }
     );
     connect(this, &PreviewClient::maximizedHorizontallyChanged, this,
             [this]() {
-        emit maximizedChanged(isMaximized());
+        Q_EMIT maximizedChanged(isMaximized());
     }
     );
     connect(this, &PreviewClient::iconNameChanged, this,
             [this]() {
         m_icon = QIcon::fromTheme(m_iconName);
-        emit iconChanged(m_icon);
+        Q_EMIT iconChanged(m_icon);
     }
     );
     connect(this, &PreviewClient::desktopChanged, this,
             [this](int) {
-        emit onAllDesktopsChanged(isOnAllDesktops());
+        Q_EMIT onAllDesktopsChanged(isOnAllDesktops());
     }
     );
     /* connect(m_palette, &KWin::Decoration::DecorationPalette::changed, [this]() {
-         emit paletteChanged(m_palette->palette());
+         Q_EMIT paletteChanged(m_palette->palette());
      });*/
     auto emitEdgesChanged = [this, c]() {
-        c->adjacentScreenEdgesChanged(adjacentScreenEdges());
+        Q_EMIT c->adjacentScreenEdgesChanged(adjacentScreenEdges());
     };
+    auto emitSizeChanged = [c]() {
+        Q_EMIT c->sizeChanged(c->size());
+    };
+    connect(this, &PreviewClient::widthChanged,  this, emitSizeChanged);
+    connect(this, &PreviewClient::heightChanged, this, emitSizeChanged);
     connect(this, &PreviewClient::bordersTopEdgeChanged,    this, emitEdgesChanged);
     connect(this, &PreviewClient::bordersLeftEdgeChanged,   this, emitEdgesChanged);
     connect(this, &PreviewClient::bordersRightEdgeChanged,  this, emitEdgesChanged);
     connect(this, &PreviewClient::bordersBottomEdgeChanged, this, emitEdgesChanged);
 
-    setColorScheme("kdeglobals");
-
-    qApp->installEventFilter(this);
+    setColorScheme(QStringLiteral("kdeglobals"));
 }
 
 PreviewClient::~PreviewClient() = default;
@@ -126,27 +130,68 @@ PreviewClient::~PreviewClient() = default;
 void PreviewClient::setIcon(const QIcon &pixmap)
 {
     m_icon = pixmap;
-    emit iconChanged(m_icon);
+    Q_EMIT iconChanged(m_icon);
 }
 
-int PreviewClient::width() const
+qreal PreviewClient::width() const
 {
     return m_width;
 }
 
-int PreviewClient::height() const
+qreal PreviewClient::height() const
 {
     return m_height;
+}
+
+QSizeF PreviewClient::size() const
+{
+    return QSizeF(m_width, m_height);
+}
+
+QString PreviewClient::windowClass() const
+{
+    return QString();
+}
+
+qreal PreviewClient::scale() const
+{
+    return 1;
+}
+
+qreal PreviewClient::nextScale() const
+{
+    return 1;
+}
+
+QString PreviewClient::applicationMenuServiceName() const
+{
+    return QString();
+}
+
+QString PreviewClient::applicationMenuObjectPath() const
+{
+    return QString();
+}
+
+bool PreviewClient::isExcludedFromCapture() const
+{
+    return m_excludeFromCapture;
+}
+
+void PreviewClient::requestToggleExcludeFromCapture()
+{
+    setExcludeFromCapture(!isExcludedFromCapture());
+}
+
+void PreviewClient::popup(const KDecoration3::Positioner &positioner, QMenu *menu)
+{
+    Q_UNUSED(positioner)
+    Q_UNUSED(menu)
 }
 
 QString PreviewClient::caption() const
 {
     return m_caption;
-}
-
-WId PreviewClient::decorationId() const
-{
-    return 0;
 }
 
 int PreviewClient::desktop() const
@@ -165,7 +210,7 @@ void PreviewClient::setDesktop(int desktop)
     }
 
     m_desktop = desktop;
-    emit desktopChanged(m_desktop);
+    Q_EMIT desktopChanged(m_desktop);
 }
 
 QIcon PreviewClient::icon() const
@@ -258,17 +303,12 @@ bool PreviewClient::providesContextHelp() const
     return m_providesContextHelp;
 }
 
-WId PreviewClient::windowId() const
-{
-    return 0;
-}
-
 QPalette PreviewClient::palette() const
 {
     return m_palette->palette();
 }
 
-QColor PreviewClient::color(KDecoration2::ColorGroup group, KDecoration2::ColorRole role) const
+QColor PreviewClient::color(KDecoration3::ColorGroup group, KDecoration3::ColorRole role) const
 {
     return m_palette->color(group, role);
 }
@@ -286,8 +326,9 @@ void PreviewClient::setColorScheme(QString scheme)
     }
 
     m_palette = new Decoration::Applet::DecorationPalette(scheme);
+    m_palette->setParent(this);
 
-    emit paletteChanged(m_palette->palette());
+    Q_EMIT paletteChanged(m_palette->palette());
 }
 
 Qt::Edges PreviewClient::adjacentScreenEdges() const
@@ -350,7 +391,7 @@ void PreviewClient::setBordersBottomEdge(bool enabled)
     }
 
     m_bordersBottomEdge = enabled;
-    emit bordersBottomEdgeChanged(enabled);
+    Q_EMIT bordersBottomEdgeChanged(enabled);
 }
 
 void PreviewClient::setBordersLeftEdge(bool enabled)
@@ -360,7 +401,7 @@ void PreviewClient::setBordersLeftEdge(bool enabled)
     }
 
     m_bordersLeftEdge = enabled;
-    emit bordersLeftEdgeChanged(enabled);
+    Q_EMIT bordersLeftEdgeChanged(enabled);
 }
 
 void PreviewClient::setBordersRightEdge(bool enabled)
@@ -370,7 +411,7 @@ void PreviewClient::setBordersRightEdge(bool enabled)
     }
 
     m_bordersRightEdge = enabled;
-    emit bordersRightEdgeChanged(enabled);
+    Q_EMIT bordersRightEdgeChanged(enabled);
 }
 
 void PreviewClient::setBordersTopEdge(bool enabled)
@@ -380,47 +421,29 @@ void PreviewClient::setBordersTopEdge(bool enabled)
     }
 
     m_bordersTopEdge = enabled;
-    emit bordersTopEdgeChanged(enabled);
+    Q_EMIT bordersTopEdgeChanged(enabled);
 }
 
 
-#if KDECORATION2_VERSION_MINOR >= 13
 void PreviewClient::requestShowToolTip(const QString &text)
 {
     Q_UNUSED(text)
-    //qDebug() << "tooltip show requested with text:" << text;
 }
 
 void PreviewClient::requestHideToolTip()
 {
-    //qDebug() << "tooltip hide requested";
 }
-#endif
 
-#if KDECORATION2_VERSION_MINOR >= 18
-QSize PreviewClient::size() const
-{
-    return {m_width, m_height};
-}
-#endif
-
-
-#if KDECORATION2_VERSION_MINOR <= 20
-void PreviewClient::requestShowWindowMenu()
-{
-    emit showWindowMenuRequested();
-}
-#else
 void PreviewClient::requestShowWindowMenu(const QRect &rect)
 {
-    emit showWindowMenuRequested();
+    Q_UNUSED(rect)
+    Q_EMIT showWindowMenuRequested();
 }
-#endif
 
 
 void PreviewClient::requestClose()
 {
-    emit closeRequested();
+    Q_EMIT closeRequested();
 }
 
 void PreviewClient::requestContextHelp()
@@ -443,7 +466,7 @@ void PreviewClient::requestToggleMaximization(Qt::MouseButtons buttons)
 
 void PreviewClient::requestMinimize()
 {
-    emit minimizeRequested();
+    Q_EMIT minimizeRequested();
 }
 
 void PreviewClient::requestToggleKeepAbove()
@@ -484,21 +507,22 @@ void PreviewClient::requestToggleShade()
     return; \
 } \
     m_##variable = variable; \
-    emit variable##Changed(m_##variable); \
+    Q_EMIT variable##Changed(m_##variable); \
 }
 
 #define SETTER2(name, variable) SETTER(bool, name, variable)
 
 SETTER(const QString &, setCaption, caption)
 SETTER(const QString &, setIconName, iconName)
-SETTER(int, setWidth, width)
-SETTER(int, setHeight, height)
+SETTER(qreal, setWidth, width)
+SETTER(qreal, setHeight, height)
 
 SETTER2(setActive, active)
 SETTER2(setCloseable, closeable)
 SETTER2(setMaximizable, maximizable)
 SETTER2(setKeepBelow, keepBelow)
 SETTER2(setKeepAbove, keepAbove)
+SETTER2(setExcludeFromCapture, excludeFromCapture)
 SETTER2(setMaximizedHorizontally, maximizedHorizontally)
 SETTER2(setMaximizedVertically, maximizedVertically)
 SETTER2(setMinimizable, minimizable)

@@ -24,8 +24,8 @@
 #ifndef KDECORATIONS_PREVIEW_BRIDGE_H
 #define KDECORATIONS_PREVIEW_BRIDGE_H
 
-#include <KDecoration2/Private/DecorationBridge>
-#include <KDecoration2/DecorationButton>
+#include <KDecoration3/Private/DecorationBridge>
+#include <KDecoration3/DecorationButton>
 
 #include <QList>
 #include <QPointer>
@@ -39,7 +39,7 @@ class PreviewButtonItem;
 class PreviewClient;
 class PreviewSettings;
 
-class PreviewBridge : public KDecoration2::DecorationBridge
+class PreviewBridge : public KDecoration3::DecorationBridge
 {
     Q_OBJECT
     Q_PROPERTY(QString plugin READ plugin WRITE setPlugin NOTIFY pluginChanged)
@@ -49,8 +49,8 @@ class PreviewBridge : public KDecoration2::DecorationBridge
 public:
     explicit PreviewBridge(QObject *parent = nullptr);
     virtual ~PreviewBridge();
-    std::unique_ptr<KDecoration2::DecoratedClientPrivate> createClient(KDecoration2::DecoratedClient *client, KDecoration2::Decoration *decoration) override;
-    std::unique_ptr<KDecoration2::DecorationSettingsPrivate> settings(KDecoration2::DecorationSettings *parent) override;
+    std::unique_ptr<KDecoration3::DecoratedWindowPrivate> createClient(KDecoration3::DecoratedWindow *client, KDecoration3::Decoration *decoration) override;
+    std::unique_ptr<KDecoration3::DecorationSettingsPrivate> settings(KDecoration3::DecorationSettings *parent) override;
 
     PreviewClient *lastCreatedClient() {
         return m_lastCreatedClient;
@@ -68,8 +68,8 @@ public:
     QString theme() const;
     bool isValid() const;
 
-    KDecoration2::Decoration *createDecoration(QObject *parent = nullptr);
-    KDecoration2::DecorationButton *createButton(KDecoration2::Decoration *decoration, KDecoration2::DecorationButtonType type, QObject *parent = nullptr);
+    KDecoration3::Decoration *createDecoration(QObject *parent = nullptr);
+    KDecoration3::DecorationButton *createButton(KDecoration3::Decoration *decoration, KDecoration3::DecorationButtonType type, QObject *parent = nullptr);
 
 public Q_SLOTS:
     void reconfigure();
@@ -79,7 +79,7 @@ Q_SIGNALS:
     void themeChanged();
     void validChanged();
 
-private slots:
+private Q_SLOTS:
     void settingsFileChanged(const QString &filename);
 
 private:

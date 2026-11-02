@@ -29,8 +29,8 @@
 #include "previewsettings.h"
 #include "previewshareddecoration.h"
 
-#include <KDecoration2/Decoration>
-#include <KDecoration2/DecoratedClient>
+#include <KDecoration3/Decoration>
+#include <KDecoration3/DecoratedWindow>
 
 #include <QDebug>
 #include <QEvent>
@@ -97,7 +97,7 @@ void PreviewButtonItem::setIsActive(bool active)
         m_client->setActive(m_isActive);
     }
 
-    emit isActiveChanged();
+    Q_EMIT isActiveChanged();
 }
 
 bool PreviewButtonItem::isMaximized() const
@@ -113,7 +113,7 @@ void PreviewButtonItem::setIsMaximized(bool maximized)
 
     m_isMaximized = maximized;
 
-    if (m_client && m_button && m_type == KDecoration2::DecorationButtonType::Maximize) {
+    if (m_client && m_button && m_type == KDecoration3::DecorationButtonType::Maximize) {
 
         if (m_isMaximized) {
             m_client->setMaximizedVertically(true);
@@ -124,7 +124,7 @@ void PreviewButtonItem::setIsMaximized(bool maximized)
         }
     }
 
-    emit isMaximizedChanged();
+    Q_EMIT isMaximizedChanged();
 }
 
 bool PreviewButtonItem::isOnAllDesktops() const
@@ -140,7 +140,7 @@ void PreviewButtonItem::setIsOnAllDesktops(bool onalldesktops)
 
     m_isOnAllDesktops = onalldesktops;
 
-    if (m_client && m_button && m_type == KDecoration2::DecorationButtonType::OnAllDesktops) {
+    if (m_client && m_button && m_type == KDecoration3::DecorationButtonType::OnAllDesktops) {
         if (m_isOnAllDesktops) {
             m_client->setDesktop(-1);
         } else {
@@ -148,7 +148,7 @@ void PreviewButtonItem::setIsOnAllDesktops(bool onalldesktops)
         }
     }
 
-    emit isOnAllDesktopsChanged();
+    Q_EMIT isOnAllDesktopsChanged();
 }
 
 bool PreviewButtonItem::isKeepAbove() const
@@ -164,7 +164,7 @@ void PreviewButtonItem::setIsKeepAbove(bool keepabove)
     
     m_isKeepAbove = keepabove;
     
-    if (m_client && m_button && m_type == KDecoration2::DecorationButtonType::KeepAbove) {
+    if (m_client && m_button && m_type == KDecoration3::DecorationButtonType::KeepAbove) {
         if (m_isKeepAbove){
             m_client->setKeepAbove(true);
         } else {
@@ -172,10 +172,10 @@ void PreviewButtonItem::setIsKeepAbove(bool keepabove)
         }
     }
 
-    emit isKeepAboveChanged();
+    Q_EMIT isKeepAboveChanged();
 }
 
-KDecoration2::DecorationButtonType PreviewButtonItem::type() const
+KDecoration3::DecorationButtonType PreviewButtonItem::type() const
 {
     return m_type;
 }
@@ -187,17 +187,17 @@ Padding *PreviewButtonItem::padding() const
 
 void PreviewButtonItem::setType(int type)
 {
-    setType(KDecoration2::DecorationButtonType(type));
+    setType(KDecoration3::DecorationButtonType(type));
 }
 
-void PreviewButtonItem::setType(KDecoration2::DecorationButtonType type)
+void PreviewButtonItem::setType(KDecoration3::DecorationButtonType type)
 {
     if (m_type == type) {
         return;
     }
 
     m_type = type;
-    emit typeChanged();
+    Q_EMIT typeChanged();
 }
 
 QString PreviewButtonItem::scheme() const
@@ -218,7 +218,7 @@ void PreviewButtonItem::setScheme(QString scheme)
         qDebug() << "buttons scheme update to:" << m_scheme;
     }
 
-    emit schemeChanged();
+    Q_EMIT schemeChanged();
 }
 
 PreviewBridge *PreviewButtonItem::bridge() const
@@ -242,7 +242,7 @@ void PreviewButtonItem::setBridge(PreviewBridge *bridge)
         m_bridge->registerButton(this);
     }
 
-    emit bridgeChanged();
+    Q_EMIT bridgeChanged();
 }
 
 int PreviewButtonItem::typeAsInt() const
@@ -263,7 +263,7 @@ void PreviewButtonItem::setLocalX(int x)
 
     m_localX = x;
 
-    emit localXChanged();
+    Q_EMIT localXChanged();
 }
 
 int PreviewButtonItem::localY() const
@@ -279,10 +279,10 @@ void PreviewButtonItem::setLocalY(int y)
 
     m_localY = y;
 
-    emit localYChanged();
+    Q_EMIT localYChanged();
 }
 
-KDecoration2::Decoration *PreviewButtonItem::decoration() const
+KDecoration3::Decoration *PreviewButtonItem::decoration() const
 {
     if (!m_sharedDecoration) {
         return nullptr;
@@ -302,11 +302,17 @@ void PreviewButtonItem::setSharedDecoration(SharedDecoration *sharedDecoration)
         return;
     }
 
+    if (m_sharedDecoration) {
+        disconnect(m_sharedDecoration, nullptr, this, nullptr);
+    }
+
     m_sharedDecoration = sharedDecoration;
 
-    connect(m_sharedDecoration, &Decoration::Applet::SharedDecoration::decorationChanged, this, &Decoration::Applet::PreviewButtonItem::createButton);
+    if (m_sharedDecoration) {
+        connect(m_sharedDecoration, &Decoration::Applet::SharedDecoration::decorationChanged, this, &Decoration::Applet::PreviewButtonItem::createButton);
+    }
 
-    emit sharedDecorationChanged();
+    Q_EMIT sharedDecorationChanged();
 }
 
 void PreviewButtonItem::componentComplete()
@@ -317,7 +323,7 @@ void PreviewButtonItem::componentComplete()
 
 void PreviewButtonItem::createButton()
 {
-    if (m_type == KDecoration2::DecorationButtonType::Custom || !m_sharedDecoration || !m_sharedDecoration->decoration() || !m_bridge) {
+    if (m_type == KDecoration3::DecorationButtonType::Custom || !m_sharedDecoration || !m_sharedDecoration->decoration() || !m_bridge) {
         return;
     }
 
@@ -358,16 +364,16 @@ void PreviewButtonItem::createButton()
     }
 
     if (!m_lastAppliedDecoration.isNull()) {
-        disconnect(m_lastAppliedDecoration.data(), &KDecoration2::Decoration::damaged, this, &PreviewButtonItem::onDecorationDamaged);
+        disconnect(m_lastAppliedDecoration.data(), &KDecoration3::Decoration::damaged, this, &PreviewButtonItem::onDecorationDamaged);
     }
 
-    connect(m_sharedDecoration->decoration(), &KDecoration2::Decoration::damaged, this, &PreviewButtonItem::onDecorationDamaged);
+    connect(m_sharedDecoration->decoration(), &KDecoration3::Decoration::damaged, this, &PreviewButtonItem::onDecorationDamaged);
     m_lastAppliedDecoration = m_sharedDecoration->decoration();
 
     m_button->setEnabled(true);
     m_button->setVisible(true);
 
-    connect(m_button, &KDecoration2::DecorationButton::geometryChanged, this, &PreviewButtonItem::onButtonDamaged);
+    connect(m_button, &KDecoration3::DecorationButton::geometryChanged, this, &PreviewButtonItem::onButtonDamaged);
 
     syncInternalGeometry();
 }
@@ -395,7 +401,7 @@ void PreviewButtonItem::syncInternalGeometry()
 void PreviewButtonItem::onButtonDamaged()
 {
     if (m_sharedDecoration && m_sharedDecoration->decoration()) {
-        emit m_sharedDecoration->decoration()->damaged(m_visualGeometry);
+        Q_EMIT m_sharedDecoration->decoration()->damaged(m_visualGeometry);
     } else {
         update();
     }
@@ -416,7 +422,7 @@ void PreviewButtonItem::paint(QPainter *painter)
 
     painter->translate(-m_visualGeometry.x() + m_padding->left(), -m_visualGeometry.y() + m_padding->top());
 
-    m_button->paint(painter, m_visualGeometry);
+    m_button->paint(painter, QRectF(m_visualGeometry));
 }
 
 void PreviewButtonItem::mouseDoubleClickEvent(QMouseEvent *event)
@@ -437,7 +443,8 @@ void PreviewButtonItem::mousePressEvent(QMouseEvent *event)
     //! this a workaround in order to send proper coordinates
     //! that confirm the button visual coordinates
     QMouseEvent e(event->type(),
-                  m_visualGeometry.center(),
+                  QPointF(m_visualGeometry.center()),
+                  event->globalPosition(),
                   event->button(),
                   event->buttons(),
                   event->modifiers());
@@ -451,20 +458,21 @@ void PreviewButtonItem::mouseReleaseEvent(QMouseEvent *event)
         return;
     }
 
-    bool inItem {m_fullGeometry.contains(event->localPos().x(), event->localPos().y())};
+    bool inItem {m_fullGeometry.contains(event->position().toPoint())};
 
     //! this a workaround in order to send proper coordinates
     //! that confirm the button visual coordinates
     QMouseEvent e(event->type(),
-                  inItem ? m_visualGeometry.center() : QPoint(-5, -5),
+                  inItem ? QPointF(m_visualGeometry.center()) : QPointF(-5, -5),
+                  event->globalPosition(),
                   event->button(),
                   event->buttons(),
                   event->modifiers());
 
-    QCoreApplication::instance()->sendEvent(m_button, event);
+    QCoreApplication::instance()->sendEvent(m_button, &e);
 
     if (inItem) {
-        emit clicked();
+        Q_EMIT clicked();
     }
 }
 
@@ -477,7 +485,8 @@ void PreviewButtonItem::mouseMoveEvent(QMouseEvent *event)
     //! this a workaround in order to send proper coordinates
     //! that confirm the button visual coordinates
     QMouseEvent e(event->type(),
-                  m_visualGeometry.center(),
+                  QPointF(m_visualGeometry.center()),
+                  event->globalPosition(),
                   event->button(),
                   event->buttons(),
                   event->modifiers());
@@ -494,8 +503,9 @@ void PreviewButtonItem::hoverEnterEvent(QHoverEvent *event)
     //! this a workaround in order to send proper coordinates
     //! that confirm the button visual coordinates
     QHoverEvent e(event->type(),
-                  m_visualGeometry.center(),
-                  QPoint(m_visualGeometry.x() + event->posF().x(), m_visualGeometry.y() + event->posF().y()),
+                  QPointF(m_visualGeometry.center()),
+                  event->globalPosition(),
+                  QPointF(m_visualGeometry.x() + event->position().x(), m_visualGeometry.y() + event->position().y()),
                   event->modifiers());
 
     QCoreApplication::instance()->sendEvent(m_button, &e);
@@ -510,8 +520,9 @@ void PreviewButtonItem::hoverLeaveEvent(QHoverEvent *event)
     //! this a workaround in order to send proper coordinates
     //! that confirm the button visual coordinates
     QHoverEvent e(event->type(),
-                  QPoint(-5, -5),
-                  m_visualGeometry.center(),
+                  QPointF(-5, -5),
+                  event->globalPosition(),
+                  QPointF(m_visualGeometry.center()),
                   event->modifiers());
 
     QCoreApplication::instance()->sendEvent(m_button, &e);
@@ -523,15 +534,15 @@ void PreviewButtonItem::hoverMoveEvent(QHoverEvent *event)
         return;
     }
 
-    QPoint newPos (qBound((double)m_visualGeometry.left(), m_visualGeometry.left() + event->posF().x(), (double)m_visualGeometry.right()),
-                   qBound((double)m_visualGeometry.top(), m_visualGeometry.top() + event->posF().x(), (double)m_visualGeometry.bottom()));
+    const QPointF newPos(qBound((double)m_visualGeometry.left(), m_visualGeometry.left() + event->position().x(), (double)m_visualGeometry.right()),
+                         qBound((double)m_visualGeometry.top(), m_visualGeometry.top() + event->position().y(), (double)m_visualGeometry.bottom()));
 
-    QPoint oldPos (qBound((double)m_visualGeometry.left(), m_visualGeometry.left() + event->oldPosF().x(), (double)m_visualGeometry.right()),
-                   qBound((double)m_visualGeometry.top(), m_visualGeometry.top() + event->oldPosF().x(), (double)m_visualGeometry.bottom()));
+    const QPointF oldPos(qBound((double)m_visualGeometry.left(), m_visualGeometry.left() + event->oldPosF().x(), (double)m_visualGeometry.right()),
+                         qBound((double)m_visualGeometry.top(), m_visualGeometry.top() + event->oldPosF().y(), (double)m_visualGeometry.bottom()));
 
     //! this a workaround in order to send proper coordinates
     //! that confirm the button visual coordinates
-    QHoverEvent e(event->type(), newPos, oldPos, event->modifiers());
+    QHoverEvent e(event->type(), newPos, event->globalPosition(), oldPos, event->modifiers());
 
     QCoreApplication::instance()->sendEvent(m_button, &e);
 }
@@ -539,7 +550,9 @@ void PreviewButtonItem::hoverMoveEvent(QHoverEvent *event)
 
 void PreviewButtonItem::focusOutEvent(QFocusEvent *event)
 {
-    QCoreApplication::instance()->sendEvent(m_button, event);
+    if (m_button) {
+        QCoreApplication::instance()->sendEvent(m_button, event);
+    }
 }
 
 } // namespace Applet

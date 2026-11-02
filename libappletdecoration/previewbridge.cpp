@@ -27,32 +27,24 @@
 #include "previewclient.h"
 #include "previewsettings.h"
 
-#include <KDecoration2/DecoratedClient>
-#include <KDecoration2/Decoration>
+#include <KDecoration3/DecoratedWindow>
+#include <KDecoration3/Decoration>
 
-#include <KCModule>
 #include <KDirWatch>
-#include <KPluginLoader>
 #include <KPluginFactory>
-#include <KPluginTrader>
+#include <KPluginMetaData>
 
 #include <QDebug>
-#include <QDBusConnection>
-#include <QDBusMessage>
-#include <QDialog>
-#include <QDialogButtonBox>
-#include <QPushButton>
 #include <QStandardPaths>
-#include <QVBoxLayout>
 
 namespace Decoration {
 namespace Applet {
 
-static const QString s_pluginName = QStringLiteral("org.kde.kdecoration2");
+static const QString s_pluginName = QStringLiteral("org.kde.kdecoration3");
 static const QString s_breezerc = QStringLiteral("breezerc");
 
 PreviewBridge::PreviewBridge(QObject *parent)
-    : KDecoration2::DecorationBridge(parent)
+    : KDecoration3::DecorationBridge(parent)
     , m_lastCreatedClient(nullptr)
     , m_lastCreatedSettings(nullptr)
     , m_valid(false)
@@ -70,18 +62,18 @@ PreviewBridge::PreviewBridge(QObject *parent)
 
 PreviewBridge::~PreviewBridge() = default;
 
-std::unique_ptr<KDecoration2::DecoratedClientPrivate> PreviewBridge::createClient(KDecoration2::DecoratedClient *client, KDecoration2::Decoration *decoration)
+std::unique_ptr<KDecoration3::DecoratedWindowPrivate> PreviewBridge::createClient(KDecoration3::DecoratedWindow *client, KDecoration3::Decoration *decoration)
 {
     auto ptr = std::unique_ptr<PreviewClient>(new PreviewClient(client, decoration));
     m_lastCreatedClient = ptr.get();
-    return std::move(ptr);
+    return ptr;
 }
 
-std::unique_ptr<KDecoration2::DecorationSettingsPrivate> PreviewBridge::settings(KDecoration2::DecorationSettings *parent)
+std::unique_ptr<KDecoration3::DecorationSettingsPrivate> PreviewBridge::settings(KDecoration3::DecorationSettings *parent)
 {
     auto ptr = std::unique_ptr<PreviewSettings>(new PreviewSettings(parent));
     m_lastCreatedSettings = ptr.get();
-    return std::move(ptr);
+    return ptr;
 }
 
 void PreviewBridge::registerButton(PreviewButtonItem *button)
@@ -102,7 +94,7 @@ void PreviewBridge::setPlugin(const QString &plugin)
 
     m_plugin = plugin;
     qDebug() << "Plugin changed to: " << m_plugin;
-    emit pluginChanged();
+    Q_EMIT pluginChanged();
 }
 
 QString PreviewBridge::theme() const
@@ -117,7 +109,7 @@ void PreviewBridge::setTheme(const QString &theme)
     }
 
     m_theme = theme;
-    emit themeChanged();
+    Q_EMIT themeChanged();
 }
 
 QString PreviewBridge::plugin() const
@@ -135,19 +127,15 @@ void PreviewBridge::createFactory()
         return;
     }
 
-    const auto offers = KPluginTrader::self()->query(s_pluginName,
-                        s_pluginName,
-                        QStringLiteral("[X-KDE-PluginInfo-Name] == '%1'").arg(m_plugin));
+    const KPluginMetaData metaData = KPluginMetaData::findPluginById(s_pluginName, m_plugin);
 
-    if (offers.isEmpty()) {
+    if (!metaData.isValid()) {
         setValid(false);
-        qDebug() << "no offers";
+        qDebug() << "Decoration plugin not found:" << m_plugin;
         return;
     }
 
-    KPluginLoader loader(offers.first().libraryPath());
-    m_factory = loader.factory();
-    qDebug() << "Factory: " << !m_factory.isNull();
+    m_factory = KPluginFactory::loadFactory(metaData).plugin;
     setValid(!m_factory.isNull());
     reconfigure();
 }
@@ -164,10 +152,10 @@ void PreviewBridge::setValid(bool valid)
     }
 
     m_valid = valid;
-    emit validChanged();
+    Q_EMIT validChanged();
 }
 
-KDecoration2::Decoration *PreviewBridge::createDecoration(QObject *parent)
+KDecoration3::Decoration *PreviewBridge::createDecoration(QObject *parent)
 {
     if (!m_valid) {
         return nullptr;
@@ -179,26 +167,16 @@ KDecoration2::Decoration *PreviewBridge::createDecoration(QObject *parent)
         args.insert(QStringLiteral("theme"), m_theme);
     }
 
-    return m_factory->create<KDecoration2::Decoration>(parent, QVariantList({args}));
+    return m_factory->create<KDecoration3::Decoration>(parent, QVariantList({args}));
 }
 
-KDecoration2::DecorationButton *PreviewBridge::createButton(KDecoration2::Decoration *decoration, KDecoration2::DecorationButtonType type, QObject *parent)
+KDecoration3::DecorationButton *PreviewBridge::createButton(KDecoration3::Decoration *decoration, KDecoration3::DecorationButtonType type, QObject *parent)
 {
     if (!m_valid) {
         return nullptr;
     }
 
-    auto button = m_factory->create<KDecoration2::DecorationButton>(parent, QVariantList({QVariant::fromValue(type), QVariant::fromValue(decoration)}));
-
-    if (!button) {
-        //! support decorations that have not been updated yet to KWin 5.23 decoration plugin approach
-        button = m_factory->create<KDecoration2::DecorationButton>(QStringLiteral("button"), parent, QVariantList({QVariant::fromValue(type), QVariant::fromValue(decoration)}));
-        if (button) {
-            qWarning() << "Loading a KDecoration2::DecorationButton using the button keyword is deprecated in KWin 5.23, register the plugin without a keyword instead" << m_plugin;
-        }
-    }
-
-    return button;
+    return m_factory->create<KDecoration3::DecorationButton>(parent, QVariantList({QVariant::fromValue(type), QVariant::fromValue(decoration)}));
 }
 
 void PreviewBridge::settingsFileChanged(const QString &filename)
@@ -213,7 +191,7 @@ void PreviewBridge::settingsFileChanged(const QString &filename)
 void PreviewBridge::reconfigure()
 {
     if (m_lastCreatedSettings) {
-        emit m_lastCreatedSettings->decorationSettings()->reconfigured();
+        Q_EMIT m_lastCreatedSettings->decorationSettings()->reconfigured();
     }
 }
 

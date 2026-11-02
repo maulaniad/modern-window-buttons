@@ -53,7 +53,7 @@ DecorationPalette::DecorationPalette(const QString &colorScheme)
     connect(&m_watcher, &QFileSystemWatcher::fileChanged, [this]() {
         m_watcher.addPath(m_colorScheme);
         update();
-        emit changed();
+        Q_EMIT changed();
     });
 
     update();
@@ -64,10 +64,10 @@ bool DecorationPalette::isValid() const
     return m_activeTitleBarColor.isValid();
 }
 
-QColor DecorationPalette::color(KDecoration2::ColorGroup group, KDecoration2::ColorRole role) const
+QColor DecorationPalette::color(KDecoration3::ColorGroup group, KDecoration3::ColorRole role) const
 {
-    using KDecoration2::ColorRole;
-    using KDecoration2::ColorGroup;
+    using KDecoration3::ColorRole;
+    using KDecoration3::ColorGroup;
 
     switch (role) {
         case ColorRole::Frame:
@@ -131,7 +131,7 @@ void DecorationPalette::update()
 
     m_palette = KColorScheme::createApplicationPalette(config);
 
-    m_activeFrameColor        = wmConfig.readEntry("frame", m_palette.color(QPalette::Active, QPalette::Background));
+    m_activeFrameColor        = wmConfig.readEntry("frame", m_palette.color(QPalette::Active, QPalette::Window));
     m_inactiveFrameColor      = wmConfig.readEntry("inactiveFrame", m_activeFrameColor);
     m_activeTitleBarColor     = wmConfig.readEntry("activeBackground", m_palette.color(QPalette::Active, QPalette::Highlight));
     m_inactiveTitleBarColor   = wmConfig.readEntry("inactiveBackground", m_inactiveFrameColor);

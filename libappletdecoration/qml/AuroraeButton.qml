@@ -17,13 +17,12 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import QtQuick 2.7
-import QtGraphicalEffects 1.0
+import QtQuick
+import Qt5Compat.GraphicalEffects
 
-import org.kde.plasma.plasmoid 2.0
-import org.kde.plasma.core 2.0 as PlasmaCore
+import org.kde.ksvg as KSvg
 
-import org.kde.appletdecoration 0.1 as AppletDecoration
+import org.kde.appletdecoration as AppletDecoration
 
 MouseArea{
     id: button
@@ -72,7 +71,7 @@ MouseArea{
         return containsPress || isToggledActivated ? "pressed-center" : "hover-center";
     }
 
-    PlasmaCore.Svg {
+    KSvg.Svg {
         id: buttonSvg
         imagePath: buttonImagePath
     }
@@ -88,7 +87,7 @@ MouseArea{
 
         opacity: !containsMouse && !containsPress && !isToggledActivated ? 1 : 0
 
-        PlasmaCore.SvgItem {
+        KSvg.SvgItem {
             x: (parent.width / 2) - (width / 2)
             y: (parent.height / 2 ) - (height / 2)
 
@@ -121,7 +120,7 @@ MouseArea{
     }
 
     // hovered icon
-    PlasmaCore.SvgItem {
+    Item {
         id: svgHoveredItem
         anchors.fill: parent
         anchors.topMargin: topPadding
@@ -131,7 +130,7 @@ MouseArea{
 
         opacity: Math.abs(svgNormalItem.opacity - 1)
 
-        PlasmaCore.SvgItem {
+        KSvg.SvgItem {
             x: (parent.width / 2) - (width / 2)
             y: (parent.height / 2 ) - (height / 2)
 

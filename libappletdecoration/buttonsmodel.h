@@ -24,7 +24,7 @@
 #ifndef KDECOARTIONS_PREVIEW_BUTTONS_MODEL_H
 #define KDECOARTIONS_PREVIEW_BUTTONS_MODEL_H
 
-#include <KDecoration2/DecorationButton>
+#include <KDecoration3/DecorationButton>
 #include <QAbstractListModel>
 
 namespace Decoration {
@@ -36,14 +36,14 @@ class ButtonsModel : public QAbstractListModel
 {
     Q_OBJECT
 public:
-    explicit ButtonsModel(const QVector< KDecoration2::DecorationButtonType > &buttons, QObject *parent = 0);
+    explicit ButtonsModel(const QList<KDecoration3::DecorationButtonType> &buttons, QObject *parent = nullptr);
     explicit ButtonsModel(QObject *parent = nullptr);
     virtual ~ButtonsModel();
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QHash< int, QByteArray > roleNames() const override;
 
-    QVector< KDecoration2::DecorationButtonType > buttons() const {
+    QList<KDecoration3::DecorationButtonType> buttons() const {
         return m_buttons;
     }
 
@@ -52,11 +52,11 @@ public:
     Q_INVOKABLE void down(int index);
     Q_INVOKABLE void move(int sourceIndex, int targetIndex);
 
-    void add(KDecoration2::DecorationButtonType type);
+    void add(KDecoration3::DecorationButtonType type);
     Q_INVOKABLE void add(int index, int type);
 
 private:
-    QVector< KDecoration2::DecorationButtonType > m_buttons;
+    QList<KDecoration3::DecorationButtonType> m_buttons;
 };
 
 }

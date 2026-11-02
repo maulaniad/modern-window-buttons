@@ -1,0 +1,21 @@
+{
+    "KPackageStructure": "Plasma/Applet",
+    "KPlugin": {
+        "Authors": [
+            {
+                "Email": "mvourlakos@gmail.com",
+                "Name": "Michail Vourlakos"
+            }
+        ],
+        "Category": "Windows and Tasks",
+        "Description": "Window buttons for your panels",
+        "EnabledByDefault": true,
+        "Icon": "focus-windows",
+        "Id": "org.kde.windowbuttons",
+        "License": "GPL-2.0+",
+        "Name": "Window Buttons",
+        "Version": "0.13.0",
+        "Website": "https://github.com/psifidotos/applet-window-buttons"
+    },
+    "X-Plasma-API-Minimum-Version": "6.0"
+}

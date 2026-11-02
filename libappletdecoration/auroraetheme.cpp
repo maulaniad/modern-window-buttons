@@ -30,7 +30,7 @@
 #include <KDirWatch>
 #include <KSharedConfig>
 
-#include <Plasma/Svg>
+#include <KSvg/Svg>
 
 namespace Decoration {
 namespace Applet {
@@ -99,7 +99,7 @@ void AuroraeTheme::setTheme(QString theme)
     m_theme = theme;
     updateAurorae(theme);
 
-    emit themeChanged();
+    Q_EMIT themeChanged();
 }
 
 QString AuroraeTheme::themeName() const
@@ -209,7 +209,7 @@ void AuroraeTheme::loadSettings()
 
     parseThemeImages();
 
-    emit settingsChanged();
+    Q_EMIT settingsChanged();
 }
 
 void AuroraeTheme::parseThemeImages()
@@ -221,10 +221,10 @@ void AuroraeTheme::parseThemeImages()
         return;
     }
 
-    Plasma::Svg *svg = new Plasma::Svg(this);
+    KSvg::Svg *svg = new KSvg::Svg(this);
     svg->setImagePath(origBackgroundFilePath);
     svg->resize(50,50);
-    QImage img = svg->image(QSize(50,50), "decoration-top");
+    QImage img = svg->image(QSize(50,50), QStringLiteral("decoration-top"));
 
     int maxOpacity = -1;
 

@@ -26,7 +26,7 @@
 #include "previewbutton.h"
 #include "previewsettings.h"
 
-#include <KDecoration2/Decoration>
+#include <KDecoration3/Decoration>
 
 namespace Decoration {
 namespace Applet {
@@ -54,17 +54,19 @@ void SharedDecoration::setBridge(PreviewBridge *bridge)
     }
 
     if (m_bridge) {
-        connect(m_bridge, &Decoration::Applet::PreviewBridge::validChanged, this, &Decoration::Applet::SharedDecoration::createDecoration);
+        disconnect(m_bridge, &Decoration::Applet::PreviewBridge::validChanged, this, &Decoration::Applet::SharedDecoration::createDecoration);
     }
 
     m_bridge = bridge;
 
-    connect(m_bridge, &Decoration::Applet::PreviewBridge::validChanged, this, &Decoration::Applet::SharedDecoration::createDecoration);
+    if (m_bridge) {
+        connect(m_bridge, &Decoration::Applet::PreviewBridge::validChanged, this, &Decoration::Applet::SharedDecoration::createDecoration);
+    }
 
-    emit bridgeChanged();
+    Q_EMIT bridgeChanged();
 }
 
-KDecoration2::Decoration *SharedDecoration::decoration() const
+KDecoration3::Decoration *SharedDecoration::decoration() const
 {
     return m_decoration;
 }
@@ -84,7 +86,7 @@ void SharedDecoration::setSettings(Settings *settings)
 
     createDecoration();
 
-    emit settingsChanged();
+    Q_EMIT settingsChanged();
 }
 
 void SharedDecoration::applySettings()
@@ -95,6 +97,7 @@ void SharedDecoration::applySettings()
 
     m_decoration->setSettings(m_settings->settings());
     m_decoration->init();
+    m_decoration->apply(m_decoration->nextState()->clone());
 }
 
 void SharedDecoration::createDecoration()
@@ -115,20 +118,25 @@ void SharedDecoration::createDecoration()
 
     if (m_decoration) {
         m_decoration->setSettings(m_settings->settings());
+        if (newDecoration) {
+            m_decoration->create();
+        }
         m_decoration->init();
-        m_decoration->setObjectName("applet-window-buttons");
+        m_decoration->apply(m_decoration->nextState()->clone());
+        m_decoration->setObjectName(QStringLiteral("applet-window-buttons"));
     }
 
     m_lastPlugin = m_bridge->plugin();
     m_lastTheme = m_bridge->theme();
 
-    emit decorationChanged();
+    Q_EMIT decorationChanged();
 }
 
 void SharedDecoration::initDecoration()
 {
     if (m_decoration) {
         m_decoration->init();
+        m_decoration->apply(m_decoration->nextState()->clone());
     }
 }
 

@@ -17,12 +17,11 @@
 *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-import QtQuick 2.7
-import QtQml.Models 2.2
+import QtQuick
+import QtQml.Models
 
-import org.kde.plasma.plasmoid 2.0
-import org.kde.plasma.core 2.0 as PlasmaCore
-import org.kde.taskmanager 0.1 as TaskManager
+import org.kde.plasma.plasmoid
+import org.kde.taskmanager as TaskManager
 
 Item {
     id: plasmaTasksItem
@@ -47,7 +46,7 @@ Item {
         id: tasksModel
         sortMode: TaskManager.TasksModel.SortVirtualDesktop
         groupMode: TaskManager.TasksModel.GroupDisabled
-        screenGeometry: plasmoid.screenGeometry
+        screenGeometry: Plasmoid.containment.screenGeometry
         activity: activityInfo.currentActivity
         virtualDesktop: virtualDesktopInfo.currentDesktop
 
@@ -103,11 +102,8 @@ Item {
                 }
 
                 function togglePinToAllDesktops() {
-                    if (root.plasma515) {
-                        tasksModel.requestVirtualDesktops(modelIndex(), 0);
-                    } else {
-                        tasksModel.requestVirtualDesktop(modelIndex(), 0);
-                    }
+                    //! an empty list means "all desktops"
+                    tasksModel.requestVirtualDesktops(modelIndex(), isOnAllDesktops ? [virtualDesktopInfo.currentDesktop] : []);
                 }
 
                 function toggleKeepAbove(){

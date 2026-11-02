@@ -44,7 +44,7 @@ public:
     Q_INVOKABLE QColor backgroundOf(const int &index) const;
 
     Q_INVOKABLE QString defaultSchemeFile() const;
-private slots:
+private Q_SLOTS:
     void initSchemes();
 
 private:

@@ -37,7 +37,7 @@
 #include <QtQml>
 #include <QQmlEngine>
 
-#include <KDecoration2/Decoration>
+#include <KDecoration3/Decoration>
 
 namespace Decoration {
 namespace Applet {
@@ -45,7 +45,7 @@ namespace Applet {
 void AppletDecorationPlugin::registerTypes(const char *uri)
 {
     Q_ASSERT(uri == QLatin1String("org.kde.appletdecoration"));
-    qmlRegisterUncreatableType<Decoration::Applet::Types>(uri, 0, 1, "Types", "Applet decoration types");
+    qmlRegisterUncreatableMetaObject(Decoration::Applet::Types::staticMetaObject, uri, 0, 1, "Types", QStringLiteral("Applet decoration types"));
 
     qmlRegisterType<Decoration::Applet::AuroraeTheme>(uri, 0, 1, "AuroraeTheme");
     qmlRegisterType<Decoration::Applet::BridgeItem>(uri, 0, 1, "Bridge");
@@ -57,17 +57,10 @@ void AppletDecorationPlugin::registerTypes(const char *uri)
     qmlRegisterType<Decoration::Applet::ExtendedTheme>(uri, 0, 1, "PlasmaThemeExtended");
     qmlRegisterType<Decoration::Applet::WindowSystem>(uri, 0, 1, "WindowSystem");
 
-#if (QT_VERSION >= QT_VERSION_CHECK(5, 14, 0))
-    qmlRegisterAnonymousType<Decoration::Applet::Padding>("", 1);
-    qmlRegisterAnonymousType<Decoration::Applet::PreviewClient>("", 1);
-    qmlRegisterAnonymousType<Decoration::Applet::PreviewBridge>("", 1);
-    qmlRegisterAnonymousType<KDecoration2::Decoration>("", 1);
-#else
-    qmlRegisterType<Decoration::Applet::Padding>();
-    qmlRegisterType<Decoration::Applet::PreviewClient>();
-    qmlRegisterType<Decoration::Applet::PreviewBridge>();
-    qmlRegisterType<KDecoration2::Decoration>();
-#endif
+    qmlRegisterAnonymousType<Decoration::Applet::Padding>(uri, 0);
+    qmlRegisterAnonymousType<Decoration::Applet::PreviewClient>(uri, 0);
+    qmlRegisterAnonymousType<Decoration::Applet::PreviewBridge>(uri, 0);
+    qmlRegisterAnonymousType<KDecoration3::Decoration>(uri, 0);
 
     qmlRegisterSingletonType<Decoration::Applet::Environment>(uri, 0, 1, "Environment", &Decoration::Applet::Environment::instance);
 }

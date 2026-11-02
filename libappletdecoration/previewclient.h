@@ -26,9 +26,8 @@
 
 #include "decorationpalette.h"
 
-#include <config-decoration.h>
-
-#include <KDecoration2/Private/DecoratedClientPrivate>
+#include <KDecoration3/Decoration>
+#include <KDecoration3/Private/DecoratedWindowPrivate>
 #include <QObject>
 #include <QPalette>
 
@@ -37,10 +36,10 @@ class QAbstractItemModel;
 namespace Decoration {
 namespace Applet {
 
-class PreviewClient : public QObject, public KDecoration2::ApplicationMenuEnabledDecoratedClientPrivate
+class PreviewClient : public QObject, public KDecoration3::DecoratedWindowPrivateV4
 {
     Q_OBJECT
-    Q_PROPERTY(KDecoration2::Decoration *decoration READ decoration CONSTANT)
+    Q_PROPERTY(KDecoration3::Decoration *decoration READ decoration CONSTANT)
     Q_PROPERTY(QString caption READ caption WRITE setCaption NOTIFY captionChanged)
     Q_PROPERTY(QIcon icon READ icon WRITE setIcon NOTIFY iconChanged)
     Q_PROPERTY(QString iconName READ iconName WRITE setIconName NOTIFY iconNameChanged)
@@ -48,6 +47,7 @@ class PreviewClient : public QObject, public KDecoration2::ApplicationMenuEnable
     Q_PROPERTY(bool closeable READ isCloseable WRITE setCloseable NOTIFY closeableChanged)
     Q_PROPERTY(bool keepAbove READ isKeepAbove WRITE setKeepAbove NOTIFY keepAboveChanged)
     Q_PROPERTY(bool keepBelow READ isKeepBelow WRITE setKeepBelow NOTIFY keepBelowChanged)
+    Q_PROPERTY(bool excludeFromCapture READ isExcludedFromCapture WRITE setExcludeFromCapture NOTIFY excludeFromCaptureChanged)
     Q_PROPERTY(bool maximizable READ isMaximizeable WRITE setMaximizable NOTIFY maximizableChanged)
     Q_PROPERTY(bool maximized READ isMaximized NOTIFY maximizedChanged)
     Q_PROPERTY(bool maximizedVertically READ isMaximizedVertically WRITE setMaximizedVertically NOTIFY maximizedVerticallyChanged)
@@ -61,25 +61,24 @@ class PreviewClient : public QObject, public KDecoration2::ApplicationMenuEnable
     Q_PROPERTY(bool shadeable READ isShadeable WRITE setShadeable NOTIFY shadeableChanged)
     Q_PROPERTY(bool shaded READ isShaded WRITE setShaded NOTIFY shadedChanged)
     Q_PROPERTY(bool providesContextHelp READ providesContextHelp WRITE setProvidesContextHelp NOTIFY providesContextHelpChanged)
-    Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
-    Q_PROPERTY(int height READ height WRITE setHeight NOTIFY heightChanged)
+    Q_PROPERTY(qreal width READ width WRITE setWidth NOTIFY widthChanged)
+    Q_PROPERTY(qreal height READ height WRITE setHeight NOTIFY heightChanged)
     Q_PROPERTY(bool bordersTopEdge    READ bordersTopEdge    WRITE setBordersTopEdge    NOTIFY bordersTopEdgeChanged)
     Q_PROPERTY(bool bordersLeftEdge   READ bordersLeftEdge   WRITE setBordersLeftEdge   NOTIFY bordersLeftEdgeChanged)
     Q_PROPERTY(bool bordersRightEdge  READ bordersRightEdge  WRITE setBordersRightEdge  NOTIFY bordersRightEdgeChanged)
     Q_PROPERTY(bool bordersBottomEdge READ bordersBottomEdge WRITE setBordersBottomEdge NOTIFY bordersBottomEdgeChanged)
 public:
-    explicit PreviewClient(KDecoration2::DecoratedClient *client, KDecoration2::Decoration *decoration);
-    virtual ~PreviewClient();
+    explicit PreviewClient(KDecoration3::DecoratedWindow *client, KDecoration3::Decoration *decoration);
+    ~PreviewClient() override;
 
     QString caption() const override;
-    WId decorationId() const override;
-    WId windowId() const override;
-    int desktop() const override;
+    int desktop() const;
     QIcon icon() const override;
     bool isActive() const override;
     bool isCloseable() const override;
     bool isKeepAbove() const override;
     bool isKeepBelow() const override;
+    bool isExcludedFromCapture() const override;
     bool isMaximizeable() const override;
     bool isMaximized() const override;
     bool isMaximizedVertically() const override;
@@ -93,29 +92,26 @@ public:
     bool isShaded() const override;
     bool providesContextHelp() const override;
 
-    int width() const override;
-    int height() const override;
+    qreal width() const override;
+    qreal height() const override;
+    QSizeF size() const override;
     QPalette palette() const override;
-    QColor color(KDecoration2::ColorGroup group, KDecoration2::ColorRole role) const override;
+    QColor color(KDecoration3::ColorGroup group, KDecoration3::ColorRole role) const override;
     Qt::Edges adjacentScreenEdges() const override;
+    QString windowClass() const override;
+    qreal scale() const override;
+    qreal nextScale() const override;
 
     bool hasApplicationMenu() const override;
     bool isApplicationMenuActive() const override;
+    QString applicationMenuServiceName() const override;
+    QString applicationMenuObjectPath() const override;
 
-#if KDECORATION2_VERSION_MINOR >= 13
     void requestShowToolTip(const QString &text) override;
     void requestHideToolTip() override;
-#endif
-
-#if KDECORATION2_VERSION_MINOR >= 18
-    QSize size() const override;
-#endif
-
-#if KDECORATION2_VERSION_MINOR <= 20
-    void requestShowWindowMenu() override;
-#else
     void requestShowWindowMenu(const QRect &rect) override;
-#endif
+    void requestToggleExcludeFromCapture() override;
+    void popup(const KDecoration3::Positioner &positioner, QMenu *menu) override;
 
     void requestClose() override;
     void requestContextHelp() override;
@@ -135,6 +131,7 @@ public:
     void setMaximizable(bool maximizable);
     void setKeepBelow(bool keepBelow);
     void setKeepAbove(bool keepAbove);
+    void setExcludeFromCapture(bool exclude);
     void setMaximizedHorizontally(bool maximized);
     void setMaximizedVertically(bool maximized);
     void setMinimizable(bool minimizable);
@@ -147,8 +144,8 @@ public:
     void setDesktop(int desktop);
     void setColorScheme(QString scheme);
 
-    void setWidth(int width);
-    void setHeight(int height);
+    void setWidth(qreal width);
+    void setHeight(qreal height);
 
     QString iconName() const;
     void setIconName(const QString &icon);
@@ -172,6 +169,7 @@ Q_SIGNALS:
     void closeableChanged(bool);
     void keepAboveChanged(bool);
     void keepBelowChanged(bool);
+    void excludeFromCaptureChanged(bool);
     void maximizableChanged(bool);
     void maximizedChanged(bool);
     void maximizedVerticallyChanged(bool);
@@ -185,8 +183,8 @@ Q_SIGNALS:
     void shadedChanged(bool);
     void providesContextHelpChanged(bool);
     void desktopChanged(int);
-    void widthChanged(int);
-    void heightChanged(int);
+    void widthChanged(qreal);
+    void heightChanged(qreal);
     void paletteChanged(const QPalette &);
     void bordersTopEdgeChanged(bool);
     void bordersLeftEdgeChanged(bool);
@@ -208,6 +206,7 @@ private:
     bool m_closeable;
     bool m_keepBelow;
     bool m_keepAbove;
+    bool m_excludeFromCapture{false};
     bool m_maximizable;
     bool m_maximizedHorizontally;
     bool m_maximizedVertically;
@@ -219,8 +218,8 @@ private:
     bool m_shaded;
     bool m_providesContextHelp;
     int m_desktop;
-    int m_width;
-    int m_height;
+    qreal m_width;
+    qreal m_height;
     bool m_bordersTopEdge;
     bool m_bordersLeftEdge;
     bool m_bordersRightEdge;
